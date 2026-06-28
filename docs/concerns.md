@@ -18,3 +18,5 @@
 - perlu tambahin docs codenya
 
 - perlu review lagi untuk securitynya
+
+- perlu bisa setting ga, user bisa pake drizzle, dan bisa gapake drizzle?
