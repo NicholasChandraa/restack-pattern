@@ -1,0 +1,13 @@
+{
+  "name": "restack-pattern",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel dev",
+    "build": "pnpm --parallel build"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "packages/*"
+  ]
+}
