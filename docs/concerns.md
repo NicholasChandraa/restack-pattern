@@ -12,3 +12,5 @@
 - Aku juga mau didalam monorepo ini, disiapin docs khusus yang dimana tujuannya supaya AI bisa langsung paham mengenai monorepo ini.
 
 - Handle dependencies update. Ini perlu dipikirkan juga kalau misal ada dependencies yang sudah diupdate, apakah sistem scaffoldingn ini sudah auto update tiap kali orang install library ini atau kita sebagai developer harus update manual.
+
+- Perlu handle juga supaya untuk login OAuth ke Google itu sudah ter setup, Telegram Bot, Discord Bot.

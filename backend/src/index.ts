@@ -1,15 +1,27 @@
-import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { serve } from "@hono/node-server"
+import { Hono } from "hono"
+import { cors } from "hono/cors"
+import { env } from "./config/env.js"
+import { authRoutes } from "./domains/auth/auth.routes.js"
 
 const app = new Hono()
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+const allowedOrigins = (process.env.FRONTEND_URL ?? "http://localhost:3000")
+  .split(",")
+  .map((url) => url.trim())
 
-serve({
-  fetch: app.fetch,
-  port: 3001
-}, (info) => {
-  console.log(`Server is running on http://localhost:${info.port}`)
+app.use(
+  "/api/*",
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+)
+
+app.route("/api/auth", authRoutes)
+
+app.get("/", (c) => c.json({ status: "ok" }))
+
+serve({ fetch: app.fetch, port: env.PORT }, (info) => {
+  console.log(`Server running on http://localhost:${info.port}`)
 })

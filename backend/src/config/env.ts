@@ -1,12 +1,18 @@
-const required = (key: string): string => {
-  const val = process.env[key]
-  if (!val) throw new Error(`Missing env var: ${key}`)
-  return val
-}
+import "dotenv/config"
+import { z } from "zod";
 
-export const env = {
-  DATABASE_URL: required("DATABASE_URL"),
-  JWT_SECRET: required("JWT_SECRET"),
-  NODE_ENV: process.env.NODE_ENV ?? "development",
-  PORT: Number(process.env.PORT ?? 3001),
-}
+const envSchema = z.object({
+  // Memastikan DATABASE_URL ada dan berformat URL valid
+  DATABASE_URL: z.string().url("DATABASE_URL harus berupa URL yang valid"),
+  // Memastikan JWT_SECRET diisi dan minimal 1 karakter
+  JWT_SECRET: z.string().min(1, "JWT_SECRET wajib diisi"),
+  // Validasi enum dengan nilai default "development"
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  // Mengubah string dari process.env menjadi Number secara otomatis
+  PORT: z.coerce.number().default(3001),
+  // Validasi cookie samesite dengan nilai default "Lax"
+  COOKIE_SAME_SITE: z.enum(["Lax", "None", "Strict", ""]).default(""),
+  FRONTEND_URL: z.string().default("http://localhost:3000"),
+})
+
+export const env = envSchema.parse(process.env)
