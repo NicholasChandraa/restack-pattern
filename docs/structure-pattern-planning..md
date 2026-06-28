@@ -11,35 +11,34 @@
 
 ```
 restack-pattern/
-├── frontend/                         # Next.js (deploy → Vercel)
-│   └── src/
-│       ├── app/                      # Routing & Layout ONLY
-│       │   ├── (auth)/
-│       │   │   ├── login/page.tsx    # Cuma render <LoginForm />
-│       │   │   └── register/page.tsx
-│       │   └── dashboard/page.tsx
+├── frontend/                         # Next.js (deploy → any static host)
+│   ├── app/                          # Routing & Layout ONLY
+│   │   ├── (auth)/
+│   │   │   ├── login/page.tsx        # Cuma render <LoginForm />
+│   │   │   └── register/page.tsx
+│   │   └── dashboard/page.tsx
+│   │
+│   ├── shared/                       # Global reusables
+│   │   ├── components/ui/            # Shadcn atoms (Button, Input, etc.)
+│   │   ├── lib/api-client.ts         # Hono RPC client + credentials config
+│   │   └── hooks/                   # Global hooks (useTheme, useDebounce)
+│   │
+│   └── domains/                      # Semi-DDD core
+│       ├── auth/
+│       │   ├── components/           # UI khusus auth
+│       │   │   ├── login-form.tsx
+│       │   │   └── register-form.tsx
+│       │   ├── hooks/                # State & data fetching
+│       │   │   └── use-login.ts
+│       │   ├── services/             # Jembatan ke backend API
+│       │   │   └── auth.api.ts
+│       │   └── types.ts              # Local types jika perlu
 │       │
-│       ├── shared/                   # Global reusables
-│       │   ├── components/ui/        # Shadcn atoms (Button, Input, etc.)
-│       │   ├── lib/api-client.ts     # Hono RPC client + credentials config
-│       │   └── hooks/               # Global hooks (useTheme, useDebounce)
-│       │
-│       └── domains/                  # Semi-DDD core
-│           ├── auth/
-│           │   ├── components/       # UI khusus auth
-│           │   │   ├── login-form.tsx
-│           │   │   └── register-form.tsx
-│           │   ├── hooks/            # State & data fetching
-│           │   │   └── use-login.ts
-│           │   ├── services/         # Jembatan ke backend API
-│           │   │   └── auth.api.ts
-│           │   └── types.ts          # Local types jika perlu
-│           │
-│           └── user/
-│               ├── components/
-│               │   └── profile-card.tsx
-│               ├── hooks/
-│               └── services/
+│       └── user/
+│           ├── components/
+│           │   └── profile-card.tsx
+│           ├── hooks/
+│           └── services/
 │
 ├── backend/                          # Hono (deploy → Railway)
 │   └── src/

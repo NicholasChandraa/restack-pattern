@@ -114,12 +114,11 @@ frontend/domains/auth/hooks/use-login.ts
 ```
 restack-pattern/
 ├── frontend/                         # Next.js → any static host
-│   └── src/
-│       ├── app/                      # Routing only
-│       ├── shared/                   # Global reusables
-│       └── domains/                  # Semi-DDD features
-│           ├── auth/
-│           └── user/
+│   ├── app/                          # Routing only
+│   ├── shared/                       # Global reusables
+│   └── domains/                      # Semi-DDD features
+│       ├── auth/
+│       └── user/
 │
 ├── backend/                          # Hono → any Node.js host
 │   └── src/
