@@ -14,3 +14,7 @@
 - Handle dependencies update. Ini perlu dipikirkan juga kalau misal ada dependencies yang sudah diupdate, apakah sistem scaffoldingn ini sudah auto update tiap kali orang install library ini atau kita sebagai developer harus update manual.
 
 - Perlu handle juga supaya untuk login OAuth ke Google itu sudah ter setup, Telegram Bot, Discord Bot.
+
+- perlu tambahin docs codenya
+
+- perlu review lagi untuk securitynya
