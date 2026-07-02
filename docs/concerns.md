@@ -20,3 +20,5 @@
 - perlu review lagi untuk securitynya
 
 - perlu bisa setting ga, user bisa pake drizzle, dan bisa gapake drizzle?
+
+- Perlu ada docs yang kasih tau kalau db nya mau bebas bisa atau engga? kaya misal pake sqllite, postgres, atau mysql. Jadi user dikasih pilihan?
