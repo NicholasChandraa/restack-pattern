@@ -1,14 +1,19 @@
 import { serve } from "@hono/node-server"
 import { Hono } from "hono"
 import { cors } from "hono/cors"
+import { csrf } from "hono/csrf"
+import { logger as honoLogger } from "hono/logger"
 import { env } from "./config/env.js"
+import { logger } from "./shared/logger/logger.js"
 import { authRoutes } from "./domains/auth/auth.routes.js"
 
 const app = new Hono()
 
-const allowedOrigins = (process.env.FRONTEND_URL ?? "http://localhost:3000")
+const allowedOrigins = env.FRONTEND_URL
   .split(",")
   .map((url) => url.trim())
+
+app.use(honoLogger((...args) => logger.info(args.join(" "))))
 
 app.use(
   "/api/*",
@@ -18,10 +23,17 @@ app.use(
   })
 )
 
+app.use(
+  "/api/*",
+  csrf({
+    origin: allowedOrigins,
+  })
+)
+
 app.route("/api/auth", authRoutes)
 
 app.get("/", (c) => c.json({ status: "ok" }))
 
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {
-  console.log(`Server running on http://localhost:${info.port}`)
+  logger.info(`Server running on http://localhost:${info.port}`)
 })

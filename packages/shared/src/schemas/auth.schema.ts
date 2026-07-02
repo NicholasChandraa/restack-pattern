@@ -2,15 +2,15 @@ import { z } from "zod"
 
 /** Zod validation schema for login form and request payload. */
 export const LoginSchema = z.object({
-  email: z.email(),
-  password: z.string().min(8),
+  email: z.email().max(254),
+  password: z.string().min(8).max(128),
 })
 
 /** Zod validation schema for registering a new account. */
 export const RegisterSchema = z.object({
-  name: z.string().min(1),
-  email: z.email(),
-  password: z.string().min(8),
+  name: z.string().min(1).max(100),
+  email: z.email().max(254),
+  password: z.string().min(8).max(128),
 })
 
 /** TypeScript input type inferred from LoginSchema. */

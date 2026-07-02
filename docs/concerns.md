@@ -1,24 +1,34 @@
 # Concerns & Open Decisions
 
+## Phase 1 (Master Template) — Done
+
+- [x] Backend logger — `pino`, wired into Hono via `hono/logger` in `backend/src/index.ts`
+- [x] Token payload extensibility — `AuthTokenPayload` type + `buildTokenPayload()` in `backend/src/domains/auth/auth.service.ts`, single spot to add roles/permissions later without redesigning
+- [x] Security review of auth code
+- [x] Implement CSRF Protection middleware in Hono (critical for cookie auth, especially with `SameSite=None` in production)
+- [ ] Implement Refresh Token flow end-to-end using the **Dual-Cookie pattern** (POST `/refresh`, DB session tracking `auth.model.ts`, short-lived `access_token` cookie + long-lived `refresh_token` cookie, optimized for Next.js SSR)
+
+
+
 ## Phase 2 (CLI)
 
 - Support multiple package managers: npm, pnpm, bun, deno
-- Either prompt user to choose or auto-detect from run context (e.g. `bunx` → bun)
+  - Either prompt user to choose or auto-detect from run context (e.g. `bunx` → bun)
+- DB choice: sqlite, postgres, or mysql — give user the option at scaffold time
+- Optional Drizzle toggle — let user opt out of Drizzle entirely
+- Dependency auto-update handling for generated projects (auto vs. manual update)
+- OAuth login setup: Google, Telegram Bot, Discord Bot (optional, config-driven)
+- AI-context docs for the generated monorepo — so AI assistants understand the structure immediately
+- Code documentation
 
 ## Monorepo Tool
 
 - pnpm workspaces for now — add Turborepo only if build time becomes a problem
 
-- Aku juga mau didalam monorepo ini, disiapin docs khusus yang dimana tujuannya supaya AI bisa langsung paham mengenai monorepo ini.
+## Code Optimizations & Refactoring
 
-- Handle dependencies update. Ini perlu dipikirkan juga kalau misal ada dependencies yang sudah diupdate, apakah sistem scaffoldingn ini sudah auto update tiap kali orang install library ini atau kita sebagai developer harus update manual.
+- [x] Refactor `apiClient` in `frontend/shared/lib/api-client.ts` to merge headers correctly and handle non-JSON error responses gracefully (prevents SyntaxError on HTTP 502/504)
+- [x] Migrate manual cookie string interpolation to Hono's official helper (`setCookie`/`deleteCookie` from `hono/cookie`) in `backend/src/domains/auth/auth.routes.ts`
+- [x] Update `allowedOrigins` in `backend/src/index.ts` to use parsed `env.FRONTEND_URL` instead of raw `process.env.FRONTEND_URL` for full type safety
 
-- Perlu handle juga supaya untuk login OAuth ke Google itu sudah ter setup, Telegram Bot, Discord Bot.
 
-- perlu tambahin docs codenya
-
-- perlu review lagi untuk securitynya
-
-- perlu bisa setting ga, user bisa pake drizzle, dan bisa gapake drizzle?
-
-- Perlu ada docs yang kasih tau kalau db nya mau bebas bisa atau engga? kaya misal pake sqllite, postgres, atau mysql. Jadi user dikasih pilihan?

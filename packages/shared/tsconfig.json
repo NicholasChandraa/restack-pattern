@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    // Menentukan direktori output hasil compile
+    "outDir": "./dist",
     /**
      * @target ESNext
      * @description Specifies the JavaScript version for the output files.

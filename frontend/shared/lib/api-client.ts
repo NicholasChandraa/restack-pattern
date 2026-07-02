@@ -5,12 +5,23 @@ export async function apiClient<T>(
   options?: RequestInit
 ): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
     ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options?.headers,
+    },
+    credentials: "include",
   })
 
-  const data = await res.json()
+  const contentType = res.headers.get("content-type")
+  let data: any
+
+  if (contentType && contentType.includes("application/json")) {
+    data = await res.json()
+  } else {
+    data = { error: (await res.text()) || "Request failed" }
+  }
+
   if (!res.ok) throw new Error(data.error ?? "Request failed")
   return data as T
 }

@@ -4,8 +4,8 @@ import { z } from "zod";
 const envSchema = z.object({
   // Memastikan DATABASE_URL ada dan berformat URL valid
   DATABASE_URL: z.string().url("DATABASE_URL harus berupa URL yang valid"),
-  // Memastikan JWT_SECRET diisi dan minimal 1 karakter
-  JWT_SECRET: z.string().min(1, "JWT_SECRET wajib diisi"),
+  // Minimal 32 karakter supaya HS256 secret tidak mudah di-brute-force
+  JWT_SECRET: z.string().min(32, "JWT_SECRET wajib diisi, minimal 32 karakter"),
   // Validasi enum dengan nilai default "development"
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   // Mengubah string dari process.env menjadi Number secara otomatis
