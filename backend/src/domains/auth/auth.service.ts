@@ -7,6 +7,14 @@ import { authRepo } from "./auth.repo.js"
 import { userRepo } from "../user/user.repo.js"
 import type { AuthTokenPayload } from "./auth.types.js"
 
+/**
+ * Service layer for the Auth domain.
+ * Houses core validation and cryptographic flows (JWT token signing, refresh token generation, hashing).
+ * 
+ * Semi-DDD rules:
+ * - `.service.ts` files encapsulate business rules and complex workflows (e.g. session issuance & rotation).
+ * - They must never call Drizzle ORM directly; always interact through the repo layer.
+ */
 const secret = new TextEncoder().encode(env.JWT_SECRET)
 const BCRYPT_COST = 12
 // Dummy hash so failed logins on unknown emails still pay the bcrypt cost (timing-attack mitigation).

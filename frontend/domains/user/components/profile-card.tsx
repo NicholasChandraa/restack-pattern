@@ -3,6 +3,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useProfile } from "../hooks/use-profile"
 
+/**
+ * ProfileCard UI component.
+ * Displays the loaded user profile information in a card layout.
+ * 
+ * Semi-DDD rules:
+ * - Domain components (`domains/[feature]/components/*`) are responsible for UI layout and rendering.
+ * - They should never perform direct HTTP calls or manage global state; instead, they consume data
+ *   and actions via domain-specific hooks (`useProfile`).
+ */
 export function ProfileCard() {
   const { profile, isLoading, error } = useProfile()
 

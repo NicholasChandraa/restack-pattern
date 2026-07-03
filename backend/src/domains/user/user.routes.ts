@@ -8,6 +8,15 @@ import { userService, UserNotFoundError } from "./user.service.js"
 import { rateLimit } from "../../shared/middlewares/rate-limit.js"
 import { logger } from "../../shared/logger/logger.js"
 
+/**
+ * Routing layer for the User domain.
+ * Configures the router and defines endpoints with appropriate middlewares.
+ * 
+ * Semi-DDD rules:
+ * - `.routes.ts` files define HTTP endpoints, parse inputs using schema validators (zValidator),
+ *   apply guards (requireAuth, rateLimit), and serialize JSON responses.
+ * - Routing code should never implement business logic directly; it must delegate to the service layer.
+ */
 export const userRoutes = new Hono<{ Variables: AuthVariables }>()
 
 // Only UserNotFoundError is an expected, safe-to-expose outcome. Anything else (DB/driver

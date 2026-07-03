@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { authApi } from "../services/auth.api"
 
+/**
+ * LogoutButton Component (Auth Domain).
+ * Simple action component to trigger sessions termination and redirect.
+ * 
+ * Semi-DDD rules:
+ * - Simple action triggers can invoke services directly if no reactive local states/business orchestration is required.
+ */
 export function LogoutButton() {
   const router = useRouter()
   const [isPending, setIsPending] = useState(false)

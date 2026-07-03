@@ -1,6 +1,13 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
+/**
+ * Next.js Router Page: Landing Page (root)
+ * 
+ * Semi-DDD rules:
+ * - Files in `frontend/app/` are strictly for layout, routing config, metadata, or entry gates.
+ * - Do not implement custom JSX layouts, forms, state, or complex components here.
+ */
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-muted/40 px-4">

@@ -8,6 +8,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRegister } from "../hooks/use-register"
 
+/**
+ * RegisterForm UI Component (Auth Domain).
+ * Handles rendering the register form and calling the `useRegister` hook.
+ * 
+ * Semi-DDD rules:
+ * - UI components should stay isolated from direct backend API fetching logic.
+ * - Local react state controls input values, and mutation runs through the domain hook.
+ */
 export function RegisterForm() {
   const { register, error, isPending } = useRegister()
   const [name, setName] = useState("")

@@ -1,8 +1,15 @@
 import type { Context, MiddlewareHandler } from "hono"
 import { getConnInfo } from "@hono/node-server/conninfo"
 
-// ponytail: in-memory fixed-window limiter, keyed by route+IP. Single-process only —
-// if the backend ever runs more than one instance, swap the Map for a shared store (Redis).
+/**
+ * In-Memory Fixed-Window Rate Limiting Middleware.
+ * 
+ * Performance/Topology Note:
+ * - This implementation stores counts in a local `Map` memory segment.
+ * - This works perfectly for single-process deployments (like a standalone Railway node).
+ * - If horizontal scaling (multiple instances) is introduced, this must be swapped
+ *   for a shared datastore (e.g. Redis) to ensure limits are synchronized globally.
+ */
 const WINDOW_MS = 60_000
 const MAX_REQUESTS = 10
 

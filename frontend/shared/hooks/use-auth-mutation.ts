@@ -4,6 +4,11 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import type { ZodType } from "zod"
 
+/**
+ * Reusable mutation hook for authorization forms (Login, Register).
+ * Standardizes Zod input validation, pending state tracking, error handling,
+ * and automatic client-side redirection on successful mutation.
+ */
 export function useAuthMutation<TInput>(schema: ZodType<TInput>, mutate: (data: TInput) => Promise<unknown>) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)

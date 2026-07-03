@@ -8,6 +8,14 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLogin } from "../hooks/use-login"
 
+/**
+ * LoginForm UI Component (Auth Domain).
+ * Handles rendering the login form and calling the `useLogin` hook.
+ * 
+ * Semi-DDD rules:
+ * - UI components should stay isolated from direct backend API fetching logic.
+ * - Local react state controls input values, and mutation runs through the domain hook.
+ */
 export function LoginForm() {
   const { login, error, isPending } = useLogin()
   const [email, setEmail] = useState("")

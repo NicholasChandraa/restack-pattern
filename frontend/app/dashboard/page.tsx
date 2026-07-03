@@ -2,6 +2,14 @@ import Link from "next/link"
 import { LogoutButton } from "@/domains/auth/components/logout-button"
 import { Button } from "@/components/ui/button"
 
+/**
+ * Next.js Router Page: Dashboard
+ * 
+ * Semi-DDD rules:
+ * - Files in `frontend/app/` are strictly for layout, routing config, metadata, or entry gates.
+ * - Do not implement custom JSX layouts, forms, state, or complex components here.
+ * - Always import and delegate rendering to domain feature components (e.g. `<LogoutButton />`).
+ */
 export default function DashboardPage() {
   return (
     <main className="p-8">

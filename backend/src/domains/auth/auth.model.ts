@@ -1,6 +1,15 @@
 import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core"
 import { usersTable } from "../user/user.model.js"
 
+/**
+ * Auth Sessions Table Schema.
+ * Tracks active, refreshable user login sessions.
+ * 
+ * Security rules:
+ * - We only store the SHA-256 hash of the refresh token (`refreshTokenHash`),
+ *   protecting the user session from being compromised if the database leaks.
+ * - Cascade delete is used so removing a user automatically purges all their active sessions.
+ */
 export const authSessionsTable = pgTable("auth_sessions", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),

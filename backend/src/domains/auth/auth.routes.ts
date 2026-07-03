@@ -8,6 +8,14 @@ import { env } from "../../config/env.js"
 import { logger } from "../../shared/logger/logger.js"
 import { rateLimit } from "../../shared/middlewares/rate-limit.js"
 
+/**
+ * Routing layer for the Auth domain.
+ * Defines the public endpoints for login, registration, logout, and token rotation.
+ * 
+ * Semi-DDD rules:
+ * - `.routes.ts` files define HTTP endpoints, validate request payloads, and apply CORS/CSRF configurations.
+ * - Endpoints should delegate business flow execution directly to the service layer.
+ */
 const isProduction = env.NODE_ENV === "production"
 const sameSite = (env.COOKIE_SAME_SITE || (isProduction ? "None" : "Lax")) as "Lax" | "None" | "Strict"
 const secure = sameSite === "None" ? true : isProduction

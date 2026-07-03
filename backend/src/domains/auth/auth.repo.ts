@@ -6,6 +6,20 @@ import { authSessionsTable } from "./auth.model.js"
 type UserRow = typeof usersTable.$inferSelect
 type SessionRow = typeof authSessionsTable.$inferSelect
 
+import { and, eq, gt } from "drizzle-orm"
+import { db } from "../../shared/db/index.js"
+import { usersTable } from "../user/user.model.js"
+import { authSessionsTable } from "./auth.model.js"
+
+/**
+ * Repository layer for the Auth domain.
+ * Encapsulates sessions management and credential-based queries.
+ * 
+ * Semi-DDD rules:
+ * - Direct database interactions (Drizzle client) must live only inside `.repo.ts` files.
+ * - Under cross-domain rules, the Auth domain can query the User domain's tables (e.g. `usersTable`)
+ *   directly for login resolution, ensuring that dependencies flow one way (auth -> user).
+ */
 export const authRepo = {
   // Explicit return type matters: without noUncheckedIndexedAccess, TS infers array
   // destructuring as always-defined, so `user ?? null` silently loses the null branch

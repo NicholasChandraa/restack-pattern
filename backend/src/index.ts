@@ -8,6 +8,11 @@ import { logger } from "./shared/logger/logger.js"
 import { authRoutes } from "./domains/auth/auth.routes.js"
 import { userRoutes } from "./domains/user/user.routes.js"
 
+/**
+ * Backend Entry Point.
+ * Initializes the global Hono application instance, mounts core middleware stacks
+ * (Pino logger, CORS policy limits, CSRF cookie verification), and maps top-level API routes.
+ */
 const app = new Hono()
 
 const allowedOrigins = env.FRONTEND_URL

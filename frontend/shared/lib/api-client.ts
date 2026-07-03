@@ -1,5 +1,14 @@
+/**
+ * Global HTTP client helper for frontend domains.
+ * Wraps global fetch and configures default options such as content types,
+ * credentials handling (sending HTTP cookies), and base API URL resolution.
+ */
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"
 
+/**
+ * Custom API Error wrapping utility.
+ * Captures both the backend error message payload and the raw HTTP response status code.
+ */
 class ApiError extends Error {
   constructor(message: string, public status: number) {
     super(message)
