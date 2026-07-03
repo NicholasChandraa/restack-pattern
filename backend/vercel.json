@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "pnpm install && pnpm --filter @restack/shared build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+}

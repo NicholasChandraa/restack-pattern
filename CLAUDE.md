@@ -69,11 +69,9 @@ Note: `.schema.ts` is **not** duplicated per-domain in the backend. Zod schemas 
 
 ## Next.js 16 caveat
 
-`frontend` runs Next.js 16 (`next@16.2.9`), which has breaking changes vs. older Next.js versions and vs. training data. `frontend/AGENTS.md` (auto-loaded) instructs checking `node_modules/next/dist/docs/` before writing Next.js code. One concrete instance already in this repo: **`middleware.ts` has been renamed to `proxy.ts`** (`frontend/proxy.ts`, exporting a `proxy()` function with the same `config.matcher` shape old middleware used) — don't recreate a `middleware.ts` file expecting it to run.
+`frontend` runs Next.js 16 (`next@16.2.9`), which has breaking changes vs. older Next.js versions and vs. training data. `frontend/AGENTS.md` (auto-loaded) instructs checking `node_modules/next/dist/docs/` before writing Next.js code. One concrete instance: Next.js 16 renamed `middleware.ts` to `proxy.ts` — don't create either file expecting a server-side auth gate to run automatically; this template doesn't use one (see below).
 
-`frontend/proxy.ts` checks whether an `access_token` **or** `refresh_token` cookie is *present* for non-public paths — it does not verify the JWT (that's intentional: `access_token` is short-lived, so presence-only lets an expired-but-refreshable session through instead of bouncing to `/login`). This is safe because the backend now enforces real verification separately: `backend/src/shared/middlewares/require-auth.ts` reads `access_token`, calls `authService.verifyAccessToken`, and 401s on failure — apply it to any route that needs to be actually protected (see `user.routes.ts` for the pattern: `userRoutes.get("/me", requireAuth, ...)`).
-
-**Cross-domain deploys:** cookies can only be shared across subdomains of the same registrable domain — never across genuinely unrelated domains (e.g. default `*.vercel.app` + `*.up.railway.app`). If FE/BE don't share an apex domain, `frontend/proxy.ts` can never see the backend's cookies, no matter the cookie config — this is a browser platform constraint, not a bug to fix here. See `docs/deployment-verification.md` before deploying to prod.
+**No proxy.ts — auth gating is client-side + backend-enforced.** An earlier version of this template had `frontend/proxy.ts` redirect to `/login` based on `access_token`/`refresh_token` cookie *presence*. That check is fundamentally broken once frontend and backend are deployed on unrelated domains (default `*.vercel.app`/`*.up.railway.app` domains, i.e. no shared apex — see Topology B in `docs/deployment-verification.md`): proxy.ts runs on the frontend's own server and can never see cookies scoped to a different registrable domain, so it would 302 every request to `/login` even for genuinely logged-in users. It was removed rather than kept as a topology-dependent special case. Real protection is: (1) `backend/src/shared/middlewares/require-auth.ts` reads `access_token`, calls `authService.verifyAccessToken`, 401s on failure — apply it to any route that needs to be actually protected (see `user.routes.ts`: `userRoutes.get("/me", requireAuth, ...)`); (2) on the frontend, every protected page calls `GET /api/user/me` on mount and redirects to `/login` on failure — `frontend/domains/user/hooks/use-profile.ts` does this itself since `/profile` needs the response data anyway, while `frontend/shared/components/require-auth.tsx` (a `<RequireAuth>` wrapper) does the same check for pages with no data of their own to fetch, like `/dashboard`. Trade-off: no more instant SSR redirect for logged-out users — the page renders first, then redirects after the client-side check fails.
 
 ## Key decisions
 
@@ -93,10 +91,10 @@ See `backend/.env.example`. Required: `DATABASE_URL`, `JWT_SECRET` (min 32 chars
 
 ## Known open items
 
-`docs/concerns.md` is the living list of unresolved decisions. Check it before assuming a described behavior is finished, and update it when resolving or introducing a decision worth tracking. Currently open: no reuse-detection on refresh-token rotation, no TTL cleanup for expired `auth_sessions` rows, and cross-domain cookie behavior is documented but **not verified against a real deployment** (`docs/deployment-verification.md`).
+`docs/concerns.md` is the living list of unresolved decisions. Check it before assuming a described behavior is finished, and update it when resolving or introducing a decision worth tracking. Currently open: no reuse-detection on refresh-token rotation, no TTL cleanup for expired `auth_sessions` rows. Cross-domain cookie behavior has been verified against a real Topology B deployment (Vercel + Vercel + Neon, see `docs/deployment-verification.md`); Topology A (same apex domain) is still untested.
 
 ## Roadmap
 
-- **Phase 1** — Master template (current): build auth domain end-to-end, verify cookies work in prod
+- **Phase 1** — Master template (done): auth domain built end-to-end, cookies verified in a real Topology B deployment (see `docs/deployment-verification.md`)
 - **Phase 2** — CLI: wrap template into `npx create-restack-pattern`
 - **Phase 3** — Portfolio: use the CLI to build a personal portfolio site

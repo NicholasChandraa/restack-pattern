@@ -1,46 +1,13 @@
 import { serve } from "@hono/node-server"
-import { Hono } from "hono"
-import { cors } from "hono/cors"
-import { csrf } from "hono/csrf"
-import { logger as honoLogger } from "hono/logger"
 import { env } from "./config/env.js"
 import { logger } from "./shared/logger/logger.js"
-import { authRoutes } from "./domains/auth/auth.routes.js"
-import { userRoutes } from "./domains/user/user.routes.js"
+import { app } from "./hono-app.js"
 
 /**
- * Backend Entry Point.
- * Initializes the global Hono application instance, mounts core middleware stacks
- * (Pino logger, CORS policy limits, CSRF cookie verification), and maps top-level API routes.
+ * Local dev / persistent-server entry point (tsx watch, Railway, Render, any VPS).
+ * Not used on Vercel — backend/api/index.ts hands the same `app` to the platform
+ * as a serverless function instead of binding a port.
  */
-const app = new Hono()
-
-const allowedOrigins = env.FRONTEND_URL
-  .split(",")
-  .map((url) => url.trim())
-
-app.use(honoLogger((...args) => logger.info(args.join(" "))))
-
-app.use(
-  "/api/*",
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-)
-
-app.use(
-  "/api/*",
-  csrf({
-    origin: allowedOrigins,
-  })
-)
-
-app.route("/api/auth", authRoutes)
-app.route("/api/user", userRoutes)
-
-app.get("/", (c) => c.json({ status: "ok" }))
-
 serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   logger.info(`Server running on http://localhost:${info.port}`)
 })
