@@ -2,7 +2,7 @@ import { z } from "zod"
 
 /** Public user shape returned by auth endpoints (register/login/refresh) — never includes the password hash. */
 export interface AuthUser {
-  id: string
+  id: number
   name: string
   email: string
 }

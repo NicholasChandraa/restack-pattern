@@ -24,8 +24,8 @@ vi.mock("../user/user.repo.js", () => ({
 const mockedAuthRepo = vi.mocked(authRepo, true)
 const mockedUserRepo = vi.mocked(userRepo, true)
 
-const dbUser = (overrides: Partial<{ id: string; name: string; email: string; password: string }> = {}) => ({
-  id: "user-1",
+const dbUser = (overrides: Partial<{ id: number; name: string; email: string; password: string }> = {}) => ({
+  id: 1,
   name: "X",
   email: "a@b.com",
   password: "hash",
@@ -33,9 +33,9 @@ const dbUser = (overrides: Partial<{ id: string; name: string; email: string; pa
   ...overrides,
 })
 
-const dbSession = (overrides: Partial<{ id: string; userId: string; refreshTokenHash: string; expiresAt: Date }> = {}) => ({
-  id: "session-1",
-  userId: "user-1",
+const dbSession = (overrides: Partial<{ id: number; userId: number; refreshTokenHash: string; expiresAt: Date }> = {}) => ({
+  id: 1,
+  userId: 1,
   refreshTokenHash: "hash",
   expiresAt: new Date(Date.now() + 60_000),
   createdAt: new Date(),
@@ -60,7 +60,7 @@ describe("authService.register", () => {
 
     const user = await authService.register({ name: "X", email: "  A@B.com  ", password: "password123" })
 
-    expect(user).toEqual({ id: "user-1", name: "X", email: "a@b.com" })
+    expect(user).toEqual({ id: 1, name: "X", email: "a@b.com" })
     const createdArg = mockedAuthRepo.create.mock.calls[0][0]
     expect(createdArg.email).toBe("a@b.com")
     expect(createdArg.password).not.toBe("password123")
@@ -87,7 +87,7 @@ describe("authService.login", () => {
     const passwordHash = await bcrypt.hash("correct-password", 4)
     mockedAuthRepo.findByEmail.mockResolvedValue(dbUser({ password: passwordHash }))
     const user = await authService.login({ email: "a@b.com", password: "correct-password" })
-    expect(user).toEqual({ id: "user-1", name: "X", email: "a@b.com" })
+    expect(user).toEqual({ id: 1, name: "X", email: "a@b.com" })
   })
 })
 
@@ -100,18 +100,18 @@ describe("authService.refresh", () => {
   it("rotates: the old session is consumed and a fresh pair is issued", async () => {
     mockedAuthRepo.consumeSessionByHash.mockResolvedValue(dbSession())
     mockedUserRepo.findById.mockResolvedValue(dbUser())
-    mockedAuthRepo.createSession.mockResolvedValue(dbSession({ id: "session-2" }))
+    mockedAuthRepo.createSession.mockResolvedValue(dbSession({ id: 2 }))
 
     const result = await authService.refresh("old-token")
 
-    expect(result.user).toEqual({ id: "user-1", name: "X", email: "a@b.com" })
+    expect(result.user).toEqual({ id: 1, name: "X", email: "a@b.com" })
     expect(typeof result.accessToken).toBe("string")
     expect(typeof result.refreshToken).toBe("string")
     expect(mockedAuthRepo.createSession).toHaveBeenCalledTimes(1)
   })
 
   it("throws if the session's user no longer exists", async () => {
-    mockedAuthRepo.consumeSessionByHash.mockResolvedValue(dbSession({ userId: "ghost" }))
+    mockedAuthRepo.consumeSessionByHash.mockResolvedValue(dbSession({ userId: 999 }))
     mockedUserRepo.findById.mockResolvedValue(null)
     await expect(authService.refresh("old-token")).rejects.toThrow("Invalid refresh token")
   })
@@ -127,15 +127,15 @@ describe("authService.revokeSession", () => {
 describe("authService.verifyAccessToken", () => {
   it("round-trips a token issued by issueTokenPair", async () => {
     mockedAuthRepo.createSession.mockResolvedValue(dbSession())
-    const { accessToken } = await authService.issueTokenPair({ id: "user-1", name: "X", email: "a@b.com" })
+    const { accessToken } = await authService.issueTokenPair({ id: 1, name: "X", email: "a@b.com" })
     const payload = await authService.verifyAccessToken(accessToken)
-    expect(payload.sub).toBe("user-1")
+    expect(payload.sub).toBe("1")
     expect(payload.email).toBe("a@b.com")
   })
 
   it("rejects a tampered token", async () => {
     mockedAuthRepo.createSession.mockResolvedValue(dbSession())
-    const { accessToken } = await authService.issueTokenPair({ id: "user-1", name: "X", email: "a@b.com" })
+    const { accessToken } = await authService.issueTokenPair({ id: 1, name: "X", email: "a@b.com" })
     const i = accessToken.indexOf(".") + 5
     const tampered = accessToken.slice(0, i) + (accessToken[i] === "a" ? "b" : "a") + accessToken.slice(i + 1)
     await expect(authService.verifyAccessToken(tampered)).rejects.toThrow()

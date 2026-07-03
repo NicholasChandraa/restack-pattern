@@ -29,7 +29,7 @@ export const authRepo = {
     return user
   },
 
-  createSession: async (data: { userId: string; refreshTokenHash: string; expiresAt: Date }) => {
+  createSession: async (data: { userId: number; refreshTokenHash: string; expiresAt: Date }) => {
     const [session] = await db.insert(authSessionsTable).values(data).returning()
     return session
   },

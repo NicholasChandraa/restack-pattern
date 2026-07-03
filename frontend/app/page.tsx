@@ -1,5 +1,7 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import logo from "@/public/logo.png"
 
 /**
  * Next.js Router Page: Landing Page (root)
@@ -12,6 +14,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-muted/40 px-4">
       <div className="text-center max-w-md">
+        <Image src={logo} alt="Logo" className="w-16 h-auto mx-auto mb-4 object-contain" priority />
         <h1 className="text-4xl font-semibold tracking-tight">RestackPattern</h1>
         <p className="mt-3 text-muted-foreground text-lg">
           Full-stack monorepo starter with Next.js, Hono, and Drizzle ORM.

@@ -24,12 +24,12 @@ const normalizeEmail = (email: string) => email.trim().toLowerCase()
 export const ACCESS_TOKEN_TTL_SECONDS = 60 * 15 // 15 minutes
 export const REFRESH_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 30 // 30 days
 
-const buildTokenPayload = (user: { id: string; email: string }): AuthTokenPayload => ({
-  sub: user.id,
+const buildTokenPayload = (user: { id: number; email: string }): AuthTokenPayload => ({
+  sub: String(user.id),
   email: user.email,
 })
 
-const signAccessToken = (user: { id: string; email: string }) =>
+const signAccessToken = (user: { id: number; email: string }) =>
   new SignJWT(buildTokenPayload(user))
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

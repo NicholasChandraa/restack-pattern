@@ -7,7 +7,7 @@ import { usersTable } from "./user.model.js"
 
 const TEST_EMAIL = `user-routes-test-${Date.now()}@example.com`
 let accessToken: string
-let userId: string
+let userId: number
 
 beforeAll(async () => {
   const user = await authService.register({ name: "Route Test", email: TEST_EMAIL, password: "password123" })

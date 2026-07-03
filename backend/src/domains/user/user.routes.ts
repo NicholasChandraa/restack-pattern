@@ -30,7 +30,7 @@ const handleProfileError = (c: Context, e: unknown, action: string) => {
 
 userRoutes.get("/me", requireAuth, async (c) => {
   try {
-    const profile = await userService.getProfile(c.get("user").sub)
+    const profile = await userService.getProfile(Number(c.get("user").sub))
     return c.json({ user: profile })
   } catch (e) {
     return handleProfileError(c, e, "Get profile failed")
@@ -40,7 +40,7 @@ userRoutes.get("/me", requireAuth, async (c) => {
 userRoutes.put("/profile", requireAuth, rateLimit, zValidator("json", UpdateProfileSchema), async (c) => {
   try {
     const body = c.req.valid("json")
-    const profile = await userService.updateProfile(c.get("user").sub, body)
+    const profile = await userService.updateProfile(Number(c.get("user").sub), body)
     return c.json({ user: profile })
   } catch (e) {
     return handleProfileError(c, e, "Update profile failed")

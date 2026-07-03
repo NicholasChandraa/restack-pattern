@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp } from "drizzle-orm/pg-core"
+import { pgTable, serial, integer, text, timestamp } from "drizzle-orm/pg-core"
 import { usersTable } from "../user/user.model.js"
 
 /**
@@ -11,8 +11,8 @@ import { usersTable } from "../user/user.model.js"
  * - Cascade delete is used so removing a user automatically purges all their active sessions.
  */
 export const authSessionsTable = pgTable("auth_sessions", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => usersTable.id, { onDelete: "cascade" }),
   // sha256 of the opaque refresh token — never store the raw token.
   refreshTokenHash: text("refresh_token_hash").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
