@@ -15,8 +15,8 @@ export default function ProfilePage() {
     <main className="p-8">
       <h1 className="text-2xl font-bold mb-6">Profile</h1>
       <ProfileCard />
-      <Button className="mt-4">
-        <Link href={"/dashboard"}>Back to Dashboard</Link>
+      <Button asChild variant="outline" className="mt-4">
+        <Link href="/dashboard">Back to Dashboard</Link>
       </Button>
     </main>
   )
