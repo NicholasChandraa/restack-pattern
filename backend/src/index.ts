@@ -6,6 +6,7 @@ import { logger as honoLogger } from "hono/logger"
 import { env } from "./config/env.js"
 import { logger } from "./shared/logger/logger.js"
 import { authRoutes } from "./domains/auth/auth.routes.js"
+import { userRoutes } from "./domains/user/user.routes.js"
 
 const app = new Hono()
 
@@ -31,6 +32,7 @@ app.use(
 )
 
 app.route("/api/auth", authRoutes)
+app.route("/api/user", userRoutes)
 
 app.get("/", (c) => c.json({ status: "ok" }))
 

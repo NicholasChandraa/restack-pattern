@@ -1,11 +1,5 @@
-import type { LoginInput, RegisterInput } from "@restack/shared"
+import type { AuthUser, LoginInput, RegisterInput } from "@restack/shared"
 import { apiClient } from "@/shared/lib/api-client"
-
-interface AuthUser {
-  id: string
-  name: string
-  email: string
-}
 
 export const authApi = {
   register: (data: RegisterInput) =>

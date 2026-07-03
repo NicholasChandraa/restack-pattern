@@ -1,35 +1,44 @@
 import { Hono } from "hono"
 import type { Context } from "hono"
-import { setCookie, deleteCookie } from "hono/cookie"
-import { randomUUID } from "node:crypto"
+import { setCookie, deleteCookie, getCookie } from "hono/cookie"
 import { zValidator } from "@hono/zod-validator"
 import { LoginSchema, RegisterSchema } from "@restack/shared"
-import { authService } from "./auth.service.js"
+import { authService, ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "./auth.service.js"
 import { env } from "../../config/env.js"
 import { logger } from "../../shared/logger/logger.js"
+import { rateLimit } from "../../shared/middlewares/rate-limit.js"
 
 const isProduction = env.NODE_ENV === "production"
-const sameSite = env.COOKIE_SAME_SITE || (isProduction ? "None" : "Lax")
+const sameSite = (env.COOKIE_SAME_SITE || (isProduction ? "None" : "Lax")) as "Lax" | "None" | "Strict"
 const secure = sameSite === "None" ? true : isProduction
 
-const cookieOptions = {
-  httpOnly: true,
-  secure,
-  sameSite: sameSite as "Lax" | "None" | "Strict",
-  path: "/",
-  maxAge: 60 * 60 * 24 * 7, // 7 days
+const domainOpt = env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}
+const deleteCookieOpts = (path: string) => ({ path, secure, sameSite, ...domainOpt })
+const cookieOpts = (path: string, maxAge: number) => ({ ...deleteCookieOpts(path), httpOnly: true, maxAge })
+
+const accessTokenCookieOptions = cookieOpts("/", ACCESS_TOKEN_TTL_SECONDS)
+const refreshTokenCookieOptions = cookieOpts("/", REFRESH_TOKEN_TTL_SECONDS)
+
+const setAuthCookies = (c: Context, tokens: { accessToken: string; refreshToken: string }) => {
+  setCookie(c, "access_token", tokens.accessToken, accessTokenCookieOptions)
+  setCookie(c, "refresh_token", tokens.refreshToken, refreshTokenCookieOptions)
+}
+
+const clearAuthCookies = (c: Context) => {
+  deleteCookie(c, "access_token", deleteCookieOpts("/"))
+  deleteCookie(c, "refresh_token", deleteCookieOpts("/"))
 }
 
 export const authRoutes = new Hono()
 
-authRoutes.post("/register", zValidator("json", RegisterSchema), async (c) => {
+authRoutes.post("/register", rateLimit, zValidator("json", RegisterSchema), async (c) => {
   try {
     const body = c.req.valid("json")
-    await authService.register(body)
-    const { token, user } = await authService.login({ email: body.email, password: body.password })
-    
-    setCookie(c, "token", token, cookieOptions)
-    
+    const user = await authService.register(body)
+    const tokens = await authService.issueTokenPair(user)
+
+    setAuthCookies(c, tokens)
+
     return c.json({ user }, 201)
   } catch (e: any) {
     logger.error({ err: e.message }, "Register failed")
@@ -37,13 +46,14 @@ authRoutes.post("/register", zValidator("json", RegisterSchema), async (c) => {
   }
 })
 
-authRoutes.post("/login", zValidator("json", LoginSchema), async (c) => {
+authRoutes.post("/login", rateLimit, zValidator("json", LoginSchema), async (c) => {
   try {
     const body = c.req.valid("json")
-    const { token, user } = await authService.login(body)
-    
-    setCookie(c, "token", token, cookieOptions)
-    
+    const user = await authService.login(body)
+    const tokens = await authService.issueTokenPair(user)
+
+    setAuthCookies(c, tokens)
+
     return c.json({ user })
   } catch (e: any) {
     logger.error({ err: e.message }, "Login failed")
@@ -51,11 +61,25 @@ authRoutes.post("/login", zValidator("json", LoginSchema), async (c) => {
   }
 })
 
-authRoutes.post("/logout", (c) => {
-  deleteCookie(c, "token", {
-    path: cookieOptions.path,
-    secure: cookieOptions.secure,
-    sameSite: cookieOptions.sameSite,
-  })
+authRoutes.post("/refresh", rateLimit, async (c) => {
+  const refreshToken = getCookie(c, "refresh_token")
+  if (!refreshToken) return c.json({ error: "Missing refresh token" }, 401)
+
+  try {
+    const tokens = await authService.refresh(refreshToken)
+    setAuthCookies(c, tokens)
+    return c.json({ user: tokens.user })
+  } catch (e: any) {
+    clearAuthCookies(c)
+    logger.error({ err: e.message }, "Refresh failed")
+    return c.json({ error: "Invalid refresh token" }, 401)
+  }
+})
+
+authRoutes.post("/logout", async (c) => {
+  const refreshToken = getCookie(c, "refresh_token")
+  if (refreshToken) await authService.revokeSession(refreshToken)
+
+  clearAuthCookies(c)
   return c.json({ success: true })
 })

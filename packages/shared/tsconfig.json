@@ -43,8 +43,9 @@
   },
 
   /**
-   * @exclude node_modules
-   * @description Excludes the node_modules folder from being compiled by TypeScript.
+   * @exclude node_modules, dist
+   * @description Excludes node_modules and the previous build output — without excluding
+   * dist, tsc picks up its own prior .d.ts output as input and fails with TS5055 on rebuild.
    */
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "dist"]
 }

@@ -12,6 +12,10 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3001),
   // Validasi cookie samesite dengan nilai default "Lax"
   COOKIE_SAME_SITE: z.enum(["Lax", "None", "Strict", ""]).default(""),
+  // Set only when FE and BE share a registrable domain via subdomains
+  // (e.g. ".example.com" for app.example.com + api.example.com) — lets
+  // the frontend's own middleware read the session cookies too.
+  COOKIE_DOMAIN: z.string().optional(),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
 })
 

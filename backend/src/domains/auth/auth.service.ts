@@ -1,8 +1,10 @@
 import bcrypt from "bcryptjs"
 import { SignJWT, jwtVerify } from "jose"
-import type { LoginInput, RegisterInput } from "@restack/shared"
+import { randomBytes, createHash } from "node:crypto"
+import type { AuthUser, LoginInput, RegisterInput } from "@restack/shared"
 import { env } from "../../config/env.js"
 import { authRepo } from "./auth.repo.js"
+import { userRepo } from "../user/user.repo.js"
 import type { AuthTokenPayload } from "./auth.types.js"
 
 const secret = new TextEncoder().encode(env.JWT_SECRET)
@@ -11,13 +13,39 @@ const BCRYPT_COST = 12
 const DUMMY_HASH = bcrypt.hashSync("dummy-password-for-timing-safety", BCRYPT_COST)
 const normalizeEmail = (email: string) => email.trim().toLowerCase()
 
+export const ACCESS_TOKEN_TTL_SECONDS = 60 * 15 // 15 minutes
+export const REFRESH_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 30 // 30 days
+
 const buildTokenPayload = (user: { id: string; email: string }): AuthTokenPayload => ({
   sub: user.id,
   email: user.email,
 })
 
+const signAccessToken = (user: { id: string; email: string }) =>
+  new SignJWT(buildTokenPayload(user))
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(`${ACCESS_TOKEN_TTL_SECONDS}s`)
+    .sign(secret)
+
+// Opaque, high-entropy refresh token — not a JWT, so it carries no forgeable claims.
+// Only its sha256 hash is ever persisted (see auth.model.ts), so a DB leak alone can't be replayed.
+const generateRefreshToken = () => randomBytes(32).toString("hex")
+const hashRefreshToken = (token: string) => createHash("sha256").update(token).digest("hex")
+
+const issueTokenPair = async (user: AuthUser) => {
+  const accessToken = await signAccessToken(user)
+  const refreshToken = generateRefreshToken()
+  await authRepo.createSession({
+    userId: user.id,
+    refreshTokenHash: hashRefreshToken(refreshToken),
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_SECONDS * 1000),
+  })
+  return { accessToken, refreshToken, user }
+}
+
 export const authService = {
-  register: async (data: RegisterInput) => {
+  register: async (data: RegisterInput): Promise<AuthUser> => {
     const email = normalizeEmail(data.email)
     const existing = await authRepo.findByEmail(email)
     if (existing) throw new Error("Email already in use")
@@ -27,20 +55,34 @@ export const authService = {
     return { id: user.id, name: user.name, email: user.email }
   },
 
-  login: async (data: LoginInput) => {
+  login: async (data: LoginInput): Promise<AuthUser> => {
     const user = await authRepo.findByEmail(normalizeEmail(data.email))
     const valid = await bcrypt.compare(data.password, user ? user.password : DUMMY_HASH)
     if (!user || !valid) throw new Error("Invalid credentials")
 
-    const token = await new SignJWT(buildTokenPayload(user))
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("7d")
-      .sign(secret)
-
-    return { token, user: { id: user.id, name: user.name, email: user.email } }
+    return { id: user.id, name: user.name, email: user.email }
   },
 
-  verifyToken: async (token: string): Promise<AuthTokenPayload> => {
+  issueTokenPair,
+
+  // Rotates the refresh token on every use: consuming it (atomic delete) and issuing
+  // a brand new pair means a stolen-but-already-used token becomes worthless, and
+  // concurrent requests racing on the same token can only ever have one winner.
+  refresh: async (refreshToken: string) => {
+    const session = await authRepo.consumeSessionByHash(hashRefreshToken(refreshToken))
+    if (!session) throw new Error("Invalid refresh token")
+
+    const user = await userRepo.findById(session.userId)
+    if (!user) throw new Error("Invalid refresh token")
+
+    return issueTokenPair({ id: user.id, name: user.name, email: user.email })
+  },
+
+  revokeSession: async (refreshToken: string) => {
+    await authRepo.deleteSessionByHash(hashRefreshToken(refreshToken))
+  },
+
+  verifyAccessToken: async (token: string): Promise<AuthTokenPayload> => {
     const { payload } = await jwtVerify(token, secret)
     return payload as AuthTokenPayload
   },
