@@ -6,11 +6,6 @@ import { authSessionsTable } from "./auth.model.js"
 type UserRow = typeof usersTable.$inferSelect
 type SessionRow = typeof authSessionsTable.$inferSelect
 
-import { and, eq, gt } from "drizzle-orm"
-import { db } from "../../shared/db/index.js"
-import { usersTable } from "../user/user.model.js"
-import { authSessionsTable } from "./auth.model.js"
-
 /**
  * Repository layer for the Auth domain.
  * Encapsulates sessions management and credential-based queries.
