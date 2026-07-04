@@ -6,7 +6,6 @@ import { LoginSchema, RegisterSchema } from "@restack/shared"
 import { authService, ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "./auth.service.js"
 import { env } from "../../config/env.js"
 import { logger } from "../../shared/logger/logger.js"
-import { rateLimit } from "../../shared/middlewares/rate-limit.js"
 
 /**
  * Routing layer for the Auth domain.
@@ -39,7 +38,7 @@ const clearAuthCookies = (c: Context) => {
 
 export const authRoutes = new Hono()
 
-authRoutes.post("/register", rateLimit, zValidator("json", RegisterSchema), async (c) => {
+authRoutes.post("/register", zValidator("json", RegisterSchema), async (c) => {
   try {
     const body = c.req.valid("json")
     const user = await authService.register(body)
@@ -54,7 +53,7 @@ authRoutes.post("/register", rateLimit, zValidator("json", RegisterSchema), asyn
   }
 })
 
-authRoutes.post("/login", rateLimit, zValidator("json", LoginSchema), async (c) => {
+authRoutes.post("/login", zValidator("json", LoginSchema), async (c) => {
   try {
     const body = c.req.valid("json")
     const user = await authService.login(body)
@@ -69,7 +68,7 @@ authRoutes.post("/login", rateLimit, zValidator("json", LoginSchema), async (c) 
   }
 })
 
-authRoutes.post("/refresh", rateLimit, async (c) => {
+authRoutes.post("/refresh", async (c) => {
   const refreshToken = getCookie(c, "refresh_token")
   if (!refreshToken) return c.json({ error: "Missing refresh token" }, 401)
 

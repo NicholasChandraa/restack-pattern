@@ -20,6 +20,12 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
       .catch(() => router.replace("/login"))
   }, [router])
 
-  if (!checked) return null
+  if (!checked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    )
+  }
   return <>{children}</>
 }
