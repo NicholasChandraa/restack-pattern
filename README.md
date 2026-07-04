@@ -5,19 +5,19 @@ Semi-DDD (feature-driven) architecture, with a production-ready dual-cookie
 refresh-token auth flow already wired end to end.
 
 Eventually this becomes a CLI (`npx create-restack-pattern`). Right now this
-repo *is* the master template, hand-built and verified against a real
+repo _is_ the master template, hand-built and verified against a real
 deployment (see [Roadmap](#roadmap)).
 
 ## Tech stack
 
-| Layer | Tech |
-|---|---|
-| Frontend | Next.js 16 (App Router) |
-| Backend | Hono |
-| Database | PostgreSQL, via Drizzle ORM |
-| Validation | Zod (shared between frontend and backend) |
-| Auth | JWT access token + opaque refresh token, both in httpOnly cookies |
-| Monorepo | pnpm workspaces |
+| Layer      | Tech                                                              |
+| ---------- | ----------------------------------------------------------------- |
+| Frontend   | Next.js 16 (App Router)                                           |
+| Backend    | Hono                                                              |
+| Database   | PostgreSQL, via Drizzle ORM                                       |
+| Validation | Zod (shared between frontend and backend)                         |
+| Auth       | JWT access token + opaque refresh token, both in httpOnly cookies |
+| Monorepo   | pnpm workspaces                                                   |
 
 ## Getting started
 
@@ -87,14 +87,13 @@ opaque, single-use `refresh_token` (30d). The frontend's `api-client.ts`
 transparently exchanges an expired access token for a new pair on the first
 401 it sees — no manual re-login until the refresh token itself expires.
 Refresh tokens are hashed (never stored raw) and rotated atomically on every
-use. Full design notes: [`docs/concerns.md`](./docs/concerns.md).
 
 ## Deploying
 
 Frontend and backend deploy as two separate Vercel projects (the backend
 ships as serverless functions — see `backend/vercel.json`). Full step-by-step
 instructions, including the gotchas hit while getting it working the first
-time: [`docs/deployment-verification.md`](./docs/deployment-verification.md).
+time: [`docs/en/deployment-verification.md`](./docs/en/deployment-verification.md) (or the Indonesian version [`docs/id/deployment-verification.md`](./docs/id/deployment-verification.md)).
 
 ## Roadmap
 

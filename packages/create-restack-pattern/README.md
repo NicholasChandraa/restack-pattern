@@ -2,7 +2,7 @@
 
 Scaffold a new Next.js + Hono + Drizzle ORM monorepo using the Restack Pattern
 (Semi-DDD / Feature-Driven) architecture — the same template built out in
-[the main repo](../../README.md), bundled as a copy-and-go generator.
+[the main repo](https://github.com/NicholasChandraa/restack-pattern), bundled as a copy-and-go generator.
 
 ## Usage
 
@@ -51,8 +51,7 @@ pnpm --filter frontend dev             # http://localhost:3000
 This is the first, deliberately minimal version of the CLI. It does not yet
 ask about package manager, database, or auth-provider choices — it always
 scaffolds the exact pnpm + Postgres + Drizzle stack from the template as-is.
-Those choices are tracked as follow-up work in the main repo's
-`docs/concerns.md`.
+Those choices are tracked as follow-up work in the main repository's roadmap.
 
 ## For maintainers: keeping the template in sync
 
