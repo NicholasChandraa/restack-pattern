@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # RestackPattern
 
-CLI scaffolding tool (in progress): `npx create-restack-pattern` — generates a full-stack monorepo with Next.js + Hono + Drizzle ORM using Semi-DDD (Feature-Driven) architecture. Right now this repo *is* the master template being hand-built (Phase 1); it isn't wrapped into a CLI yet.
+CLI scaffolding tool: `npx create-restack-pattern <name>` — generates a full-stack monorepo with Next.js + Hono + Drizzle ORM using Semi-DDD (Feature-Driven) architecture. This repo is both the master template (Phase 1, hand-built in `frontend/`/`backend/`/`packages/shared/`) and, as of Phase 2 MVP, the CLI that wraps it (`packages/create-restack-pattern/`). The CLI bundles a **copy** of the template rather than reading these live directories — see `packages/create-restack-pattern/README.md` for the resync step maintainers must run after editing the template.
 
 ## Monorepo Structure
 
@@ -12,6 +12,7 @@ CLI scaffolding tool (in progress): `npx create-restack-pattern` — generates a
 restack-pattern/
 ├── frontend/          # Next.js 16 (App Router) — deploy to any static host
 ├── backend/           # Hono + Drizzle ORM — deploy to any Node.js host
+├── packages/create-restack-pattern/  # The CLI (Phase 2) — bundles a copy of the template below
 ├── packages/shared/   # Zod schemas — single source of truth, imported by FE and BE
 └── docs/              # Planning & architecture docs (concerns.md tracks open decisions)
 ```
@@ -53,7 +54,7 @@ Code is grouped by **business feature (domain)**, not file type.
 | `.repo.ts` | Drizzle queries only — no business logic |
 | `.model.ts` | Drizzle table definitions |
 
-Note: `.schema.ts` is **not** duplicated per-domain in the backend. Zod schemas live directly in `packages/shared/src/schemas/[feature].schema.ts` and are imported back into the backend via `@restack/shared` (see `auth.routes.ts`, `auth.service.ts`). `docs/structure-pattern-planning..md` describes schemas as backend-owned and re-exported to shared — that was the original plan, not the current code. Treat `packages/shared` as the actual source of truth.
+Note: `.schema.ts` is **not** duplicated per-domain in the backend. Zod schemas live directly in `packages/shared/src/schemas/[feature].schema.ts` and are imported back into the backend via `@restack/shared` (see `auth.routes.ts`, `auth.service.ts`). `docs/structure-pattern-planning.md` describes the architecture layout and domain layer rules. Treat `packages/shared` as the actual source of truth.
 
 ### Frontend (`frontend/domains/[feature]/`)
 | Folder | Responsibility |
@@ -96,5 +97,5 @@ See `backend/.env.example`. Required: `DATABASE_URL`, `JWT_SECRET` (min 32 chars
 ## Roadmap
 
 - **Phase 1** — Master template (done): auth domain built end-to-end, cookies verified in a real Topology B deployment (see `docs/deployment-verification.md`)
-- **Phase 2** — CLI: wrap template into `npx create-restack-pattern`
+- **Phase 2** — CLI: wrap template into `npx create-restack-pattern` (MVP done: copies the bundled template, renames the root package, installs deps, builds `@restack/shared`, `git init`s — no interactive prompts yet, see `docs/concerns.md` for deferred choices like package manager/DB/auth-provider selection)
 - **Phase 3** — Portfolio: use the CLI to build a personal portfolio site

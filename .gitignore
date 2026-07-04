@@ -13,6 +13,7 @@
 # Env files (Abaikan semua file env di folder mana pun)
 **/.env*
 **/*.env
+!**/.env.example
 
 # Logs
 **/logs/
@@ -29,3 +30,11 @@ Thumbs.db
 # IDE settings
 .vscode/
 .idea/
+
+# Claude Code local overrides (personal, not shared with the team)
+.claude/settings.local.json
+test-project/
+test-app/
+
+# Exclude concerns from git
+docs/concerns.md

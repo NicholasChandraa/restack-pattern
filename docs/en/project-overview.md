@@ -41,22 +41,20 @@ Code is grouped by **business feature (domain)**, not by technical file type.
 
 ### Backend (Hono)
 
-Each domain has exactly 5 files:
+Each domain has exactly 4 files:
 
 ```
 domains/[feature]/
 ├── [feature].routes.ts    # HTTP endpoints, input validation
 ├── [feature].service.ts   # Business logic only
 ├── [feature].repo.ts      # Database queries only
-├── [feature].schema.ts    # Zod schemas (exported to shared)
 └── [feature].model.ts     # Drizzle table definitions
 ```
 
 **Layer rules:**
-- `routes` → validates input, calls service, returns response
+- `routes` → validates input (using Zod schemas from `@restack/shared`), calls service, returns response
 - `service` → business logic, never touches DB directly
 - `repo` → Drizzle queries only, no business logic
-- `schema` → Zod shapes, no logic
 - `model` → Drizzle table definitions, no logic
 
 ### Frontend (Next.js)
@@ -97,14 +95,12 @@ This eliminates the most common auth bug when deploying FE and BE to different d
 
 ## Key Feature: End-to-End Type Safety
 
-Zod schemas are written once in the backend and shared to the frontend via `packages/shared`. If the backend schema changes, TypeScript errors appear on the frontend immediately — no manual sync needed.
+Zod schemas are written once in `packages/shared/src/schemas` and shared with both backend and frontend. If the schema changes, TypeScript errors appear on both sides immediately — no manual sync needed.
 
 ```
-backend/domains/auth/auth.schema.ts
-        ↓ re-exported via
 packages/shared/src/schemas/auth.schema.ts
-        ↓ imported by
-frontend/domains/auth/hooks/use-login.ts
+         ↙                        ↘
+backend/src/domains/...     frontend/domains/...
 ```
 
 ---

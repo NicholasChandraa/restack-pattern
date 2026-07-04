@@ -1,0 +1,26 @@
+{
+  "name": "create-restack-pattern",
+  "version": "0.1.0",
+  "description": "Scaffold a new Next.js + Hono + Drizzle monorepo using the Restack Pattern (Semi-DDD) template.",
+  "license": "MIT",
+  "type": "module",
+  "private": false,
+  "bin": {
+    "create-restack-pattern": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "template"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "sync-template": "node scripts/sync-template.mjs",
+    "prepublishOnly": "pnpm sync-template && pnpm build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}

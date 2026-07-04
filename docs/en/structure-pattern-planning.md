@@ -53,24 +53,23 @@ restack-pattern/
 │       │   │   ├── auth.routes.ts    # POST /login, /register, /logout, /refresh
 │       │   │   ├── auth.service.ts   # Logic: verify password, set/clear cookie
 │       │   │   ├── auth.repo.ts      # Query: find user by email (import dari user.model)
-│       │   │   ├── auth.schema.ts    # Zod: LoginInput, RegisterInput → export ke shared
 │       │   │   └── auth.model.ts     # Drizzle: tabel sessions / refresh_tokens
 │       │   │
 │       │   └── user/
 │       │       ├── user.routes.ts    # GET /me, PUT /profile
 │       │       ├── user.service.ts
 │       │       ├── user.repo.ts
-│       │       ├── user.schema.ts    # Zod: UpdateProfileInput
 │       │       └── user.model.ts     # Drizzle: tabel users
 │       │
 │       └── index.ts                  # Entry point: load semua *.routes.ts
 │
 ├── packages/
-│   └── shared/                       # Single source of truth
+│   └── shared/                       # Single source of truth (Zod schemas)
 │       ├── package.json
 │       └── src/
+│           ├── index.ts              # Re-export semua schema dari subfolder
 │           └── schemas/
-│               ├── auth.schema.ts    # Re-export dari backend auth.schema
+│               ├── auth.schema.ts    # Didefinisikan langsung di sini
 │               └── user.schema.ts
 │
 └── package.json                      # pnpm workspaces root
@@ -83,11 +82,12 @@ restack-pattern/
 ### Backend
 | File | Boleh tahu apa | TIDAK boleh |
 |------|----------------|-------------|
-| `.routes.ts` | HTTP req/res, Zod validation | Business logic |
+| `.routes.ts` | HTTP req/res, validasi input (mengimpor schema dari `@restack/shared`) | Business logic |
 | `.service.ts` | Business logic | Query DB langsung |
 | `.repo.ts` | Drizzle queries | Business logic |
-| `.schema.ts` | Zod shapes | - |
 | `.model.ts` | Drizzle table def | - |
+
+Note: Zod schemas (`.schema.ts`) tidak dibuat di dalam backend domain, melainkan langsung ditaruh di `packages/shared/src/schemas/` sebagai *single source of truth* untuk frontend dan backend.
 
 ### Frontend
 | Folder | Isi | TIDAK boleh |

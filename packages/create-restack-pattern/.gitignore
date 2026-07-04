@@ -1,0 +1,3 @@
+# Generated from frontend/backend/packages/shared via `pnpm sync-template` —
+# not source of truth, regenerated automatically before publish (see prepublishOnly).
+template/
