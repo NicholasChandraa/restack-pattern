@@ -5,7 +5,6 @@ import { UpdateProfileSchema } from "@restack/shared"
 import type { AuthVariables } from "../../shared/middlewares/require-auth.js"
 import { requireAuth } from "../../shared/middlewares/require-auth.js"
 import { userService, UserNotFoundError } from "./user.service.js"
-import { rateLimit } from "../../shared/middlewares/rate-limit.js"
 import { logger } from "../../shared/logger/logger.js"
 
 /**
@@ -14,7 +13,7 @@ import { logger } from "../../shared/logger/logger.js"
  * 
  * Semi-DDD rules:
  * - `.routes.ts` files define HTTP endpoints, parse inputs using schema validators (zValidator),
- *   apply guards (requireAuth, rateLimit), and serialize JSON responses.
+ *   apply guards (requireAuth), and serialize JSON responses.
  * - Routing code should never implement business logic directly; it must delegate to the service layer.
  */
 export const userRoutes = new Hono<{ Variables: AuthVariables }>()
@@ -37,7 +36,7 @@ userRoutes.get("/me", requireAuth, async (c) => {
   }
 })
 
-userRoutes.put("/profile", requireAuth, rateLimit, zValidator("json", UpdateProfileSchema), async (c) => {
+userRoutes.put("/profile", requireAuth, zValidator("json", UpdateProfileSchema), async (c) => {
   try {
     const body = c.req.valid("json")
     const profile = await userService.updateProfile(Number(c.get("user").sub), body)
