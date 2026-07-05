@@ -15,11 +15,13 @@ npx create-restack-pattern my-app
 ```
 
 Or run it without arguments to be prompted for a project name:
+
 ```bash
 npx create-restack-pattern
 ```
 
 ### Prerequisites
+
 - **Node.js**: version 20 or higher
 - **pnpm**: package manager installed (run `npm install -g pnpm` if needed)
 - **PostgreSQL**: a running database (either a local instance or a free hosted instance on [Neon](https://neon.tech))
@@ -31,26 +33,32 @@ npx create-restack-pattern
 Once the CLI finishes scaffolding your project, follow these three simple steps to get started:
 
 ### 1. Configure Environment Variables
+
 ```bash
 cd my-app
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
+
 - Open `backend/.env` and set:
   - `DATABASE_URL` (format: `postgresql://user:password@localhost:5432/dbname`; you can use a local Postgres database or a free hosted instance on [Neon](https://neon.tech))
   - `JWT_SECRET` (generate a secure 32-character key by running: `openssl rand -base64 32`)
-- *(Optional)* Open `frontend/.env` to override `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:3001` for local Hono API).
+- _(Optional)_ Open `frontend/.env` to override `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:3001` for local Hono API).
 
 ### 2. Push Database Tables
+
 This creates the required `users` and `auth_sessions` tables in your database:
+
 ```bash
 pnpm --filter backend db:push
 ```
 
 ### 3. Start Development Servers
+
 ```bash
 pnpm dev
 ```
+
 - **Backend API**: runs at [http://localhost:3001](http://localhost:3001)
 - **Frontend App**: runs at [http://localhost:3000](http://localhost:3000)
 
@@ -95,5 +103,5 @@ Before testing your CLI changes locally or publishing, follow the standard workf
    ```
 
 For detailed guides, workflow explanations, and lessons learned:
+
 - Check out the [Development Guide](../../docs/en/development-guide.md) (Indonesian: [Panduan Kontribusi](../../docs/id/development-guide.md))
-- Check out the [Building a Scaffolding CLI Tutorial](../../docs/tutorial.md)
