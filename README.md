@@ -6,6 +6,8 @@
 
 Skip the boilerplate — scaffold a full-stack Next.js + Hono + PostgreSQL monorepo with secure auth cookies, structured logging, and a type-safe Hono RPC client end-to-end, all wired up and ready to deploy.
 
+This is the source repository. The CLI itself is published on npm as [`create-restack-pattern`](https://www.npmjs.com/package/create-restack-pattern).
+
 ## Prerequisites
 
 Before running the scaffolding command, ensure you have:
