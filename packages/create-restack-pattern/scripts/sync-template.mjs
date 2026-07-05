@@ -40,6 +40,7 @@ const SOURCES = [
   ["pnpm-workspace.yaml", "pnpm-workspace.yaml"],
   [".gitignore", ".gitignore"],
   ["CLAUDE_TEMPLATE.md", "CLAUDE.md"],
+  ["CLAUDE_TEMPLATE.md", "AGENTS.md"],
 ]
 
 if (existsSync(templateDir)) rmSync(templateDir, { recursive: true, force: true })
