@@ -185,7 +185,7 @@ decision tree (same apex domain vs. unrelated `*.vercel.app` domains) — lives 
    validates `DATABASE_URL` eagerly at cold start).
 2. Backend and frontend deploy as **two separate Vercel projects** from this one repo, each with
    `rootDirectory` set to `backend`/`frontend` respectively.
-3. Set env vars per project (`DATABASE_URL`, `JWT_SECRET`, `FRONTEND_URL` on the backend;
+3. Set env vars per project (`DATABASE_URL`, `JWT_SECRET`, `FRONTEND_URL`, and optionally `LOG_FILE_PATH` on the backend;
    `NEXT_PUBLIC_API_URL` on the frontend, baked in at build time).
 4. Smoke test: `curl` the backend's `/` route, then register/login/dashboard in a browser, then
    verify the refresh flow (delete just `access_token`, reload, confirm it still works).

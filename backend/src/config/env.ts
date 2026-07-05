@@ -17,6 +17,7 @@ const envSchema = z.object({
   // the frontend's own middleware read the session cookies too.
   COOKIE_DOMAIN: z.string().optional(),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
+  LOG_FILE_PATH: z.string().optional(),
 })
 
 export const env = envSchema.parse(process.env)

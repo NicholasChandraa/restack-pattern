@@ -54,3 +54,9 @@ Each domain has 4 primary files:
 - Access tokens are automatically refreshed by the client-side `apiClient` on a 401 response.
 - Cookie configuration: `SameSite=None` in production (requires `Secure=true`), and `SameSite=Lax` in development (`Secure=false` since local dev runs on HTTP).
 - There is no server-side auth gate (`middleware.ts`/`proxy.ts`) because cookies cannot be read server-side when frontend and backend deploy to unrelated domains (Topology B). Authenticated routes are protected via backend `requireAuth` middleware, and frontend pages are protected via `<RequireAuth>` or client-side checks in hooks.
+
+## Structured & Correlation Logging
+- Every incoming HTTP request is tagged with a unique `requestId` via Hono's `requestId` middleware.
+- A request-scoped child logger (`logger.child({ requestId })`) is bound to Hono's context.
+- In route handlers, always extract the request-specific child logger from Hono's context (`c.get("logger") || logger`) to log events. This ensures all logs generated during a request carry the correct `requestId` and `userId` context (which is automatically enriched by the `requireAuth` middleware).
+

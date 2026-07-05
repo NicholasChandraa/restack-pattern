@@ -157,7 +157,7 @@ Tiga aturan penting pada konfigurasi ini:
 - **File `backend/public/.gitkeep` harus ada.** Vercel tetap membutuhkan direktori output (default `public`) meskipun proyek ini hanya berupa API tanpa aset statik.
 - **Build `@restack/shared` di `installCommand`, bukan `buildCommand`.** Perintah build di top-level memberitahu Vercel bahwa proyek ini menghasilkan output statik, yang akan memicu persyaratan direktori output di atas. `installCommand` tidak memicu efek samping ini.
 
-Environment Variables Backend (Produksi): `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `FRONTEND_URL` (URL proyek frontend Anda). Deploy dari **root repositori**, bukan di dalam folder backend agar workspace pnpm ikut terbawa:
+Environment Variables Backend (Produksi): `DATABASE_URL`, `JWT_SECRET`, `NODE_ENV=production`, `FRONTEND_URL` (URL proyek frontend Anda), serta `LOG_FILE_PATH` (opsional untuk menyimpan log ke berkas). Deploy dari **root repositori**, bukan di dalam folder backend agar workspace pnpm ikut terbawa:
 
 ```bash
 vercel deploy --cwd . --project restack-pattern-backend --yes --prod
