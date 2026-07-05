@@ -105,6 +105,16 @@ backend/src/domains/...     frontend/domains/...
 
 ---
 
+## Fitur Utama: Structured & Correlation Logging
+
+Monorepo ini mengimplementasikan **logging terstruktur siap produksi (production-ready structured logging)** menggunakan **Pino** dan middleware Hono:
+- **Correlation ID (Request ID)**: UUID acak unik dihasilkan secara otomatis untuk setiap request HTTP yang masuk via middleware bawaan Hono `requestId`.
+- **Contextual Request Logger**: Logger turunan spesifik request (`logger.child({ requestId })`) diikat ke context Hono. Semua log di sepanjang alur request tersebut akan otomatis membawa `requestId` yang sama, mempermudah pelacakan (tracing) log di produksi tanpa tercampur aduk.
+- **Integrasi Konteks User**: Middleware autentikasi secara otomatis menyisipkan context `userId` ke dalam child logger setelah login terverifikasi. Setiap log yang dicetak di dalam rute terproteksi akan otomatis membawa label user yang melakukan request.
+- **Pino + Pino-Pretty**: Output berformat JSON satu baris yang terstruktur di lingkungan produksi (sangat ideal untuk aggregator log seperti BetterStack/Logtail, Axiom, Datadog) dan format visual berwarna yang mudah dibaca di lingkungan lokal (development).
+
+---
+
 ## Struktur Folder
 
 ```

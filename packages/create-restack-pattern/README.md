@@ -42,8 +42,7 @@ pnpm --filter frontend dev             # http://localhost:3000
 ## What you get
 
 - `frontend/` — Next.js 16 (App Router)
-- `backend/` — Hono + Drizzle ORM, with a working JWT + refresh-token auth
-  flow, rate limiting, and an example `user` domain already wired up
+- `backend/` — Hono + Drizzle ORM, with a working JWT + refresh-token auth flow, production-ready structured correlation logging (Pino + Hono request tracing), and an example `user` domain already wired up
 - `packages/shared/` — Zod schemas shared between frontend and backend
 
 ## Current scope (MVP)

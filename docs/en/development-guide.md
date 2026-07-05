@@ -93,6 +93,31 @@ Cookies and CORS just work locally with zero configuration (`localhost` cookie-m
 defaults) — see `docs/deployment-verification.md`'s "Local development" section if login doesn't
 seem to persist; it's almost always a `FRONTEND_URL` mismatch, not a cookie problem.
 
+### 3.1. Logging in Route Handlers (Correlation Logging)
+
+The backend implements structured logging with **Pino** that correlates logs to the incoming HTTP request:
+- Every request is tagged with a unique `requestId` by Hono's `requestId` middleware.
+- A request-scoped child logger is stored in Hono's context variable (`logger`).
+- If the user is authenticated, the `requireAuth` middleware automatically enriches this child logger with the `userId` context.
+
+**Best Practice**: In route handlers, always extract the request-specific child logger from Hono's context (`c`) and fall back to the global logger. This ensures all logs generated during the request carry the correct `requestId` and `userId` automatically (making debugging production logs extremely easy).
+
+```typescript
+import { logger } from "../../shared/logger/logger.js"
+
+authRoutes.post("/login", async (c) => {
+  const reqLogger = c.get("logger") || logger
+  try {
+    reqLogger.info("Attempting user login") // Stamped with requestId!
+    // ...
+  } catch (e: any) {
+    reqLogger.error({ err: e.message }, "Login failed") // Stamped with requestId + userId (if authenticated)!
+    return c.json({ error: e.message }, 401)
+  }
+})
+```
+
+
 ## 4. Architecture in one paragraph
 
 Code is grouped by **business feature (domain)**, not file type — `backend/src/domains/auth/`,

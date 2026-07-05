@@ -71,6 +71,31 @@ Pengujian `backend test` akan mengakses database PostgreSQL asli Anda secara lok
 
 Konfigurasi Cookie dan CORS akan langsung berfungsi di lingkungan lokal secara otomatis (`localhost` cookie-matching + default dev). Jika proses login tidak bertahan, penyebab utamanya hampir selalu karena ketidaksesuaian `FRONTEND_URL` di `backend/.env` dengan URL frontend Anda — bukan masalah atribut cookie. Biarkan `COOKIE_SAME_SITE` dan `COOKIE_DOMAIN` dikomentari di dev; keduanya adalah konfigurasi khusus produksi.
 
+### 3.1. Penulisan Log di Route Handlers (Correlation Logging)
+
+Backend monorepo ini mengimplementasikan pencatatan log terstruktur dengan **Pino** yang menghubungkan log secara langsung ke request HTTP terkait:
+- Setiap request ditandai dengan `requestId` unik via middleware `requestId` Hono.
+- Child logger spesifik request disimpan di variabel context Hono (`logger`).
+- Jika pengguna terautentikasi, middleware `requireAuth` secara otomatis memperkaya child logger tersebut dengan context `userId`.
+
+**Praktik Terbaik (Best Practice)**: Di dalam route handler baru, selalu ambil child logger spesifik request dari context Hono (`c`) dengan fallback ke logger global. Hal ini menjamin bahwa seluruh log yang tercetak di sepanjang request tersebut akan otomatis membawa `requestId` dan `userId` yang sama (sangat mempermudah debugging log di produksi).
+
+```typescript
+import { logger } from "../../shared/logger/logger.js"
+
+authRoutes.post("/login", async (c) => {
+  const reqLogger = c.get("logger") || logger
+  try {
+    reqLogger.info("Attempting user login") // Otomatis dilabeli requestId!
+    // ...
+  } catch (e: any) {
+    reqLogger.error({ err: e.message }, "Login failed") // Otomatis dilabeli requestId + userId (jika terautentikasi)!
+    return c.json({ error: e.message }, 401)
+  }
+})
+```
+
+
 ## 4. Penjelasan Singkat Arsitektur
 
 Kode dikelompokkan berdasarkan **fitur bisnis (domain)**, bukan tipe file — `backend/src/domains/auth/`, `backend/src/domains/user/`, `frontend/domains/auth/`, dll. Domain backend dibagi menjadi `.routes.ts` (HTTP + validasi), `.service.ts` (logika bisnis), `.repo.ts` (query Drizzle), dan `.model.ts` (definisi tabel). Domain frontend dibagi menjadi `components/`, `hooks/`, dan `services/`. Zod schemas didefinisikan sekali di `packages/shared/src/schemas/` dan diimpor oleh kedua belah pihak. Domain `auth` boleh mengimpor dari `user`, tetapi arah sebaliknya dilarang. Aturan lengkap serta alasan di balik keputusan arsitektur (dual-cookie refresh token, timing-safe login, tanpa `middleware.ts`) dapat dibaca di `CLAUDE.md`.

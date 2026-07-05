@@ -105,6 +105,16 @@ backend/src/domains/...     frontend/domains/...
 
 ---
 
+## Key Feature: Structured & Correlation Logging
+
+This template implements **production-ready structured logging** using **Pino** and Hono middlewares:
+- **Correlation ID (Request ID)**: A unique UUID is generated for every incoming HTTP request via Hono's `requestId` middleware.
+- **Contextual Request Logger**: A request-specific child logger (`logger.child({ requestId })`) is bound to Hono's context. Any message logged within the request lifecycle automatically carries the `requestId`, making it trivial to trace logs in production without them interleaving.
+- **User Context Integration**: The authentication middleware automatically enriches the request's child logger with `userId` context. Every log printed during a request made by an authenticated user will automatically have `userId` attached.
+- **Pino + Pino-Pretty**: Standard JSON line formatting in production (ideal for aggregator platforms like BetterStack/Logtail, Axiom, Datadog) and beautiful colored console output in local development.
+
+---
+
 ## Folder Structure
 
 ```

@@ -82,11 +82,15 @@ token rotation, etc).
 
 ## Auth flow
 
-Dual-cookie refresh tokens: a short-lived JWT `access_token` (15m) and an
-opaque, single-use `refresh_token` (30d). The frontend's `api-client.ts`
-transparently exchanges an expired access token for a new pair on the first
-401 it sees — no manual re-login until the refresh token itself expires.
-Refresh tokens are hashed (never stored raw) and rotated atomically on every
+Dual-cookie refresh tokens: a short-lived JWT `access_token` (15m) and an opaque, single-use `refresh_token` (30d). The frontend's `api-client.ts` transparently exchanges an expired access token for a new pair on the first 401 it sees — no manual re-login until the refresh token itself expires. Refresh tokens are hashed (never stored raw) and rotated atomically on every exchange (using a single DB DELETE ... RETURNING operation to prevent TOCTOU race conditions).
+
+## Structured & Correlation Logging
+
+This template implements **production-ready structured logging** using **Pino** and **Hono**:
+- **Request ID (Correlation ID)**: A unique UUID is generated for every incoming HTTP request via `hono/request-id`.
+- **Contextual Request Logger**: A request-specific child logger (`logger.child({ requestId })`) is bound to Hono's context. Any message logged within the request lifecycle automatically carries the `requestId`, making it trivial to trace logs in production without them interleaving.
+- **User Context Integration**: The authentication middleware automatically enriches the request's child logger with `userId` context. Every log printed during a request made by an authenticated user will automatically have `userId` attached.
+- **Pino + Pino-Pretty**: Standard JSON line formatting in production (ideal for aggregator platforms like BetterStack/Logtail, Axiom, Datadog) and beautiful colored console output in local development.
 
 ## Deploying
 
