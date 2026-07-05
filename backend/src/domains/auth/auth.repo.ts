@@ -1,5 +1,5 @@
 import { and, eq, gt } from "drizzle-orm"
-import { db } from "../../shared/db/index.js"
+import { db } from "../../infra/db/index.js"
 import { usersTable } from "../user/user.model.js"
 import { authSessionsTable } from "./auth.model.js"
 

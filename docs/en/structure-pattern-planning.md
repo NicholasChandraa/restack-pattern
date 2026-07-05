@@ -18,10 +18,13 @@ restack-pattern/
 │   │   │   └── register/page.tsx
 │   │   └── dashboard/page.tsx
 │   │
-│   ├── shared/                       # Global reusables
-│   │   ├── components/ui/            # Shadcn atoms (Button, Input, etc.)
-│   │   ├── lib/api-client.ts         # Hono RPC client (hc<AppType>) + credentials config
-│   │   └── hooks/                   # Global hooks (useTheme, useDebounce)
+│   ├── components/                   # Global components (e.g. RequireAuth) & UI (Shadcn)
+│   │   ├── ui/                       # Shadcn atoms (Button, Input, etc.)
+│   │   └── require-auth.tsx
+│   ├── lib/                          # Global libraries & utils (api-client, cn)
+│   │   ├── api-client.ts             # Hono RPC client (hc<AppType>) + credentials config
+│   │   └── utils.ts                  # Tailwind merger helper (cn)
+│   ├── hooks/                        # Global hooks (useAuthMutation, useDebounce)
 │   │
 │   └── domains/                      # Semi-DDD core
 │       ├── auth/
@@ -44,9 +47,10 @@ restack-pattern/
 │   └── src/
 │       ├── config/                   # env, cors, server config
 │       │
-│       ├── shared/                   # Kode shared antar domain
+│       ├── infra/                    # Global technical infrastructure
 │       │   ├── db/                   # Drizzle client init
-│       │   └── middlewares/          # Auth guard, logger
+│       │   └── middlewares/          # Auth guard
+│       ├── utils/                    # Global helper utilities (logger)
 │       │
 │       ├── domains/                  # Semi-DDD core
 │       │   ├── auth/

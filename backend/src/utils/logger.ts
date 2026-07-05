@@ -1,5 +1,5 @@
 import pino from "pino"
-import { env } from "../../config/env.js"
+import { env } from "../config/env.js"
 
 /**
  * Global logger client.
@@ -32,7 +32,7 @@ export const logger = loggerInstance
 
 
 import type { Logger } from "pino"
-import type { AuthTokenPayload } from "../../domains/auth/auth.types.js"
+import type { AuthTokenPayload } from "../domains/auth/auth.types.js"
 
 export type AppVariables = {
   requestId: string

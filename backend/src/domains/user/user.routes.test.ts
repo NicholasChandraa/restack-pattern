@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest"
 import { eq } from "drizzle-orm"
 import { userRoutes } from "./user.routes.js"
 import { authService } from "../auth/auth.service.js"
-import { db } from "../../shared/db/index.js"
+import { db } from "../../infra/db/index.js"
 import { usersTable } from "./user.model.js"
 
 const TEST_EMAIL = `user-routes-test-${Date.now()}@example.com`

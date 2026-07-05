@@ -103,7 +103,7 @@ The backend implements structured logging with **Pino** that correlates logs to 
 **Best Practice**: In route handlers, always extract the request-specific child logger from Hono's context (`c`) and fall back to the global logger. This ensures all logs generated during the request carry the correct `requestId` and `userId` automatically (making debugging production logs extremely easy).
 
 ```typescript
-import { logger } from "../../shared/logger/logger.js"
+import { logger } from "../../utils/logger.js"
 
 authRoutes.post("/login", async (c) => {
   const reqLogger = c.get("logger") || logger

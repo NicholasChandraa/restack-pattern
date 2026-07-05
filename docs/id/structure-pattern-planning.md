@@ -18,10 +18,13 @@ restack-pattern/
 │   │   │   └── register/page.tsx
 │   │   └── dashboard/page.tsx
 │   │
-│   ├── shared/                       # Kode global yang dapat digunakan kembali
-│   │   ├── components/ui/            # Komponen atomik Shadcn (Button, Input, dll.)
-│   │   ├── lib/api-client.ts         # Client RPC Hono (hc<AppType>) + konfigurasi kredensial cookie
-│   │   └── hooks/                   # Hook global (useTheme, useDebounce)
+│   ├── components/                   # Komponen global (e.g. RequireAuth) dan UI (Shadcn)
+│   │   ├── ui/                       # Komponen atomik Shadcn (Button, Input, dll.)
+│   │   └── require-auth.tsx
+│   ├── lib/                          # Pustaka & utilitas global (api-client, cn)
+│   │   ├── api-client.ts             # Client RPC Hono (hc<AppType>) + konfigurasi kredensial cookie
+│   │   └── utils.ts                  # Integrasi tailwind-merge (fungsi cn)
+│   ├── hooks/                        # Hook global (useAuthMutation, useDebounce)
 │   │
 │   └── domains/                      # Inti arsitektur Semi-DDD
 │       ├── auth/
@@ -44,9 +47,10 @@ restack-pattern/
 │   └── src/
 │       ├── config/                   # Konfigurasi env, cors, dan server
 │       │
-│       ├── shared/                   # Kode bersama antar domain
+│       ├── infra/                    # Infrastruktur teknis global
 │       │   ├── db/                   # Inisialisasi client Drizzle
-│       │   └── middlewares/          # Guard autentikasi, logger
+│       │   └── middlewares/          # Guard autentikasi
+│       ├── utils/                    # Utilitas pembantu global (logger)
 │       │
 │       ├── domains/                  # Inti arsitektur Semi-DDD
 │       │   ├── auth/

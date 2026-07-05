@@ -4,7 +4,7 @@ Panduan tentang bagaimana cookie autentikasi dikonfigurasikan di seluruh pengemb
 
 ## Tanpa Server-side Auth Gate — Cek di Sisi Client (Client-side Check)
 
-Berbeda dengan templat Next.js pada umumnya, proyek ini **tidak menggunakan berkas `middleware.ts` atau `proxy.ts`**. Halaman yang dilindungi akan memeriksa status autentikasi di sisi client — `frontend/domains/user/hooks/use-profile.ts` dan `frontend/shared/components/require-auth.tsx` memanggil `GET /api/user/me` saat komponen dimuat (on mount) dan mengarahkan pengguna ke `/login` jika gagal.
+Berbeda dengan templat Next.js pada umumnya, proyek ini **tidak menggunakan berkas `middleware.ts` atau `proxy.ts`**. Halaman yang dilindungi akan memeriksa status autentikasi di sisi client — `frontend/domains/user/hooks/use-profile.ts` dan `frontend/components/require-auth.tsx` memanggil `GET /api/user/me` saat komponen dimuat (on mount) dan mengarahkan pengguna ke `/login` jika gagal.
 
 Langkah ini sengaja diambil (lihat peringatan Next.js 16 di `CLAUDE.md`): pemeriksaan keberadaan cookie di server tidak dapat berfungsi saat frontend dan backend berada di domain yang berbeda (kondisi normal pada produksi). Oleh karena itu, daripada mengelola dua perilaku berbeda untuk pengembangan dan produksi, pemeriksaan di sisi client digunakan untuk kedua kondisi. Konsekuensinya: halaman akan dirender terlebih dahulu sebelum dialihkan jika sesi tidak valid, bukan pengalihan SSR instan.
 

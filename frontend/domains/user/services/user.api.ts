@@ -1,5 +1,5 @@
 import type { AuthUser, UpdateProfileInput } from "@restack/shared"
-import { client, unwrap } from "@/shared/lib/api-client"
+import { client, unwrap } from "@/lib/api-client"
 
 /**
  * Service API layer for the User domain.

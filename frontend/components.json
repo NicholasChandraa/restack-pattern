@@ -16,7 +16,7 @@
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
     "lib": "@/lib",
-    "hooks": "@/shared/hooks"
+    "hooks": "@/hooks"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

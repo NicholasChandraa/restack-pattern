@@ -4,7 +4,7 @@ import { csrf } from "hono/csrf"
 import { logger as honoLogger } from "hono/logger"
 import { requestId } from "hono/request-id"
 import { env } from "./config/env.js"
-import { logger, type AppVariables } from "./shared/logger/logger.js"
+import { logger, type AppVariables } from "./utils/logger.js"
 import { authRoutes } from "./domains/auth/auth.routes.js"
 import { userRoutes } from "./domains/user/user.routes.js"
 

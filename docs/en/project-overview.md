@@ -62,10 +62,13 @@ domains/[feature]/
 
 ```
 app/                          # Routing ONLY (render domain components)
-shared/
-├── components/ui/            # Shadcn atoms (Button, Input)
-├── lib/api-client.ts         # Hono RPC client (hc<AppType>)
-└── hooks/                    # Global hooks
+components/                   # Global components (e.g. RequireAuth) and UI (Shadcn)
+├── ui/                       # Shadcn atoms (Button, Input)
+├── require-auth.tsx
+lib/
+├── api-client.ts             # Hono RPC client (hc<AppType>)
+└── utils.ts                  # Tailwind merger helper (cn)
+hooks/                        # Global hooks (e.g. useAuthMutation)
 domains/[feature]/
 ├── components/               # UI specific to this feature
 ├── hooks/                    # State + data fetching logic
@@ -124,7 +127,9 @@ This template implements **production-ready structured logging** using **Pino** 
 restack-pattern/
 ├── frontend/                         # Next.js → any static host
 │   ├── app/                          # Routing only
-│   ├── shared/                       # Global reusables
+│   ├── components/                   # Global components & UI
+│   ├── lib/                          # Global libraries & utils (api-client, cn)
+│   ├── hooks/                        # Global hooks
 │   └── domains/                      # Semi-DDD features
 │       ├── auth/
 │       └── user/
@@ -132,9 +137,10 @@ restack-pattern/
 ├── backend/                          # Hono → any Node.js host
 │   └── src/
 │       ├── config/
-│       ├── shared/
+│       ├── infra/                    # DB connection & HTTP middlewares
 │       │   ├── db/
 │       │   └── middlewares/
+│       ├── utils/                    # Global utilities (logger)
 │       ├── domains/                  # Semi-DDD features
 │       │   ├── auth/
 │       │   └── user/

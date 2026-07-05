@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm"
-import { db } from "../../shared/db/index.js"
+import { db } from "../../infra/db/index.js"
 import { usersTable } from "./user.model.js"
 
 export type UserRow = typeof usersTable.$inferSelect

@@ -81,7 +81,7 @@ Backend monorepo ini mengimplementasikan pencatatan log terstruktur dengan **Pin
 **Praktik Terbaik (Best Practice)**: Di dalam route handler baru, selalu ambil child logger spesifik request dari context Hono (`c`) dengan fallback ke logger global. Hal ini menjamin bahwa seluruh log yang tercetak di sepanjang request tersebut akan otomatis membawa `requestId` dan `userId` yang sama (sangat mempermudah debugging log di produksi).
 
 ```typescript
-import { logger } from "../../shared/logger/logger.js"
+import { logger } from "../../utils/logger.js"
 
 authRoutes.post("/login", async (c) => {
   const reqLogger = c.get("logger") || logger

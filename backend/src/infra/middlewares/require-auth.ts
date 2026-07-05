@@ -1,7 +1,7 @@
 import type { MiddlewareHandler } from "hono"
 import { getCookie } from "hono/cookie"
 import { authService } from "../../domains/auth/auth.service.js"
-import type { AppVariables } from "../logger/logger.js"
+import type { AppVariables } from "../../utils/logger.js"
 
 /**
  * Authentication guard middleware.

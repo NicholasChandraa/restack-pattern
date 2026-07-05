@@ -2,9 +2,9 @@ import { Hono } from "hono"
 import type { Context } from "hono"
 import { zValidator } from "@hono/zod-validator"
 import { UpdateProfileSchema } from "@restack/shared"
-import { requireAuth } from "../../shared/middlewares/require-auth.js"
+import { requireAuth } from "../../infra/middlewares/require-auth.js"
 import { userService, UserNotFoundError } from "./user.service.js"
-import { logger, type AppVariables } from "../../shared/logger/logger.js"
+import { logger, type AppVariables } from "../../utils/logger.js"
 
 /**
  * Routing layer for the User domain.

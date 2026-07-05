@@ -5,7 +5,7 @@ import { zValidator } from "@hono/zod-validator"
 import { LoginSchema, RegisterSchema } from "@restack/shared"
 import { authService, ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "./auth.service.js"
 import { env } from "../../config/env.js"
-import { logger, type AppVariables } from "../../shared/logger/logger.js"
+import { logger, type AppVariables } from "../../utils/logger.js"
 
 /**
  * Routing layer for the Auth domain.

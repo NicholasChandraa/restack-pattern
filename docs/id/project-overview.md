@@ -62,10 +62,13 @@ domains/[feature]/
 
 ```
 app/                          # HANYA untuk routing (merender komponen domain)
-shared/
-├── components/ui/            # Komponen atomik Shadcn (Button, Input, dll.)
-├── lib/api-client.ts         # Client RPC Hono (hc<AppType>)
-└── hooks/                    # Hook global
+components/                   # Komponen global (e.g. RequireAuth) dan UI (Shadcn)
+├── ui/                       # Komponen atomik Shadcn (Button, Input, dll.)
+├── require-auth.tsx
+lib/
+├── api-client.ts             # Client RPC Hono (hc<AppType>)
+└── utils.ts                  # Integrasi tailwind-merge (fungsi cn)
+hooks/                        # Hook global (e.g. useAuthMutation)
 domains/[feature]/
 ├── components/               # UI khusus untuk fitur terkait
 ├── hooks/                    # Logika state + fetching data
@@ -124,7 +127,9 @@ Monorepo ini mengimplementasikan **logging terstruktur siap produksi (production
 restack-pattern/
 ├── frontend/                         # Next.js → deploy ke hosting statis mana pun
 │   ├── app/                          # Hanya untuk routing
-│   ├── shared/                       # Kode global yang dapat digunakan kembali
+│   ├── components/                   # Komponen global & UI
+│   ├── lib/                          # Pustaka & utilitas global (api-client, cn)
+│   ├── hooks/                        # Hook global
 │   └── domains/                      # Fitur-fitur Semi-DDD
 │       ├── auth/
 │       └── user/
@@ -132,9 +137,10 @@ restack-pattern/
 ├── backend/                          # Hono → deploy ke hosting Node.js mana pun
 │   └── src/
 │       ├── config/
-│       ├── shared/
+│       ├── infra/                    # Koneksi database & middleware HTTP
 │       │   ├── db/
 │       │   └── middlewares/
+│       ├── utils/                    # Utilitas global (logger)
 │       ├── domains/                  # Fitur-fitur Semi-DDD
 │       │   ├── auth/
 │       │   └── user/

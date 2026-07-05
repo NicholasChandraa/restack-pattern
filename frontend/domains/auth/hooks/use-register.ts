@@ -1,7 +1,7 @@
 "use client"
 
 import { RegisterSchema, type RegisterInput } from "@restack/shared"
-import { useAuthMutation } from "@/shared/hooks/use-auth-mutation"
+import { useAuthMutation } from "@/hooks/use-auth-mutation"
 import { authApi } from "../services/auth.api"
 
 /**
