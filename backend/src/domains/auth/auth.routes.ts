@@ -5,7 +5,7 @@ import { zValidator } from "@hono/zod-validator"
 import { LoginSchema, RegisterSchema } from "@restack/shared"
 import { authService, ACCESS_TOKEN_TTL_SECONDS, REFRESH_TOKEN_TTL_SECONDS } from "./auth.service.js"
 import { env } from "../../config/env.js"
-import { logger } from "../../shared/logger/logger.js"
+import { logger, type AppVariables } from "../../shared/logger/logger.js"
 
 /**
  * Routing layer for the Auth domain.
@@ -36,7 +36,7 @@ const clearAuthCookies = (c: Context) => {
   deleteCookie(c, "refresh_token", deleteCookieOpts("/"))
 }
 
-export const authRoutes = new Hono()
+export const authRoutes = new Hono<{ Variables: AppVariables }>()
 
 authRoutes.post("/register", zValidator("json", RegisterSchema), async (c) => {
   try {
@@ -48,7 +48,8 @@ authRoutes.post("/register", zValidator("json", RegisterSchema), async (c) => {
 
     return c.json({ user }, 201)
   } catch (e: any) {
-    logger.error({ err: e.message }, "Register failed")
+    const reqLogger = c.get("logger") || logger
+    reqLogger.error({ err: e.message }, "Register failed")
     return c.json({ error: e.message }, 400)
   }
 })
@@ -63,7 +64,8 @@ authRoutes.post("/login", zValidator("json", LoginSchema), async (c) => {
 
     return c.json({ user })
   } catch (e: any) {
-    logger.error({ err: e.message }, "Login failed")
+    const reqLogger = c.get("logger") || logger
+    reqLogger.error({ err: e.message }, "Login failed")
     return c.json({ error: e.message }, 401)
   }
 })
@@ -78,7 +80,8 @@ authRoutes.post("/refresh", async (c) => {
     return c.json({ user: tokens.user })
   } catch (e: any) {
     clearAuthCookies(c)
-    logger.error({ err: e.message }, "Refresh failed")
+    const reqLogger = c.get("logger") || logger
+    reqLogger.error({ err: e.message }, "Refresh failed")
     return c.json({ error: "Invalid refresh token" }, 401)
   }
 })

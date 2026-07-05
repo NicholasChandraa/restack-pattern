@@ -13,3 +13,13 @@ export const logger = pino({
       ? undefined
       : { target: "pino-pretty", options: { colorize: true } },
 })
+
+import type { Logger } from "pino"
+import type { AuthTokenPayload } from "../../domains/auth/auth.types.js"
+
+export type AppVariables = {
+  requestId: string
+  logger: Logger
+  user?: AuthTokenPayload
+}
+
