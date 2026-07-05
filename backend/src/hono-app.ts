@@ -61,8 +61,11 @@ app.use(
   })
 )
 
-app.route("/api/auth", authRoutes)
-app.route("/api/user", userRoutes)
+const routes = app
+  .route("/api/auth", authRoutes)
+  .route("/api/user", userRoutes)
 
 app.get("/", (c) => c.json({ status: "ok" }))
+
+export type AppType = typeof routes
 

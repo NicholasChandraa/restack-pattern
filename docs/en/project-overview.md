@@ -21,17 +21,17 @@ Generates a production-ready monorepo with Next.js + Hono + Drizzle ORM, structu
 
 ## Tech Stack
 
-| Layer | Tech |
-|-------|------|
-| Frontend | Next.js (App Router) |
-| Backend | Hono |
-| Database ORM | Drizzle ORM |
-| Database | PostgreSQL (Neon) |
-| Validation | Zod (shared FE ↔ BE) |
-| Auth | JWT in httpOnly cookie |
-| Monorepo | pnpm workspaces (+ Turborepo when build time matters) |
-| Frontend deploy | Any static host (Vercel, Netlify, Cloudflare Pages) |
-| Backend deploy | Any Node.js host (Railway, Render, Fly.io, VPS) |
+| Layer           | Tech                                                  |
+| --------------- | ----------------------------------------------------- |
+| Frontend        | Next.js (App Router)                                  |
+| Backend         | Hono                                                  |
+| Database ORM    | Drizzle ORM                                           |
+| Database        | PostgreSQL (Neon)                                     |
+| Validation      | Zod (shared FE ↔ BE)                                  |
+| Auth            | JWT in httpOnly cookie                                |
+| Monorepo        | pnpm workspaces (+ Turborepo when build time matters) |
+| Frontend deploy | Any static host (Vercel, Netlify, Cloudflare Pages)   |
+| Backend deploy  | Any Node.js host (Railway, Render, Fly.io, VPS)       |
 
 ---
 
@@ -52,6 +52,7 @@ domains/[feature]/
 ```
 
 **Layer rules:**
+
 - `routes` → validates input (using Zod schemas from `@restack/shared`), calls service, returns response
 - `service` → business logic, never touches DB directly
 - `repo` → Drizzle queries only, no business logic
@@ -63,7 +64,7 @@ domains/[feature]/
 app/                          # Routing ONLY (render domain components)
 shared/
 ├── components/ui/            # Shadcn atoms (Button, Input)
-├── lib/api-client.ts         # Hono RPC client
+├── lib/api-client.ts         # Hono RPC client (hc<AppType>)
 └── hooks/                    # Global hooks
 domains/[feature]/
 ├── components/               # UI specific to this feature
@@ -73,6 +74,7 @@ domains/[feature]/
 ```
 
 **Layer rules:**
+
 - `app/page.tsx` → only renders a domain component, nothing else
 - `components` → UI only, no data fetching
 - `hooks` → logic + state, no direct HTTP calls
@@ -85,9 +87,9 @@ domains/[feature]/
 Cookie config adapts automatically to environment:
 
 | Environment | SameSite | Secure |
-|-------------|----------|--------|
-| Development | Lax | false |
-| Production | None | true |
+| ----------- | -------- | ------ |
+| Development | Lax      | false  |
+| Production  | None     | true   |
 
 This eliminates the most common auth bug when deploying FE and BE to different domains.
 
@@ -108,6 +110,7 @@ backend/src/domains/...     frontend/domains/...
 ## Key Feature: Structured & Correlation Logging
 
 This template implements **production-ready structured logging** using **Pino** and Hono middlewares:
+
 - **Correlation ID (Request ID)**: A unique UUID is generated for every incoming HTTP request via Hono's `requestId` middleware.
 - **Contextual Request Logger**: A request-specific child logger (`logger.child({ requestId })`) is bound to Hono's context. Any message logged within the request lifecycle automatically carries the `requestId`, making it trivial to trace logs in production without them interleaving.
 - **User Context Integration**: The authentication middleware automatically enriches the request's child logger with `userId` context. Every log printed during a request made by an authenticated user will automatically have `userId` attached.
@@ -142,16 +145,3 @@ restack-pattern/
 │
 └── package.json                      # pnpm workspaces root
 ```
-
----
-
-## Roadmap
-
-### Phase 1 — Master Template
-Build the monorepo manually. Implement Auth domain end-to-end (register, login, logout). Deploy to Vercel + Railway. Verify cookies work in production.
-
-### Phase 2 — CLI
-Convert the master template into a CLI script callable via `npx create-restack-pattern`.
-
-### Phase 3 — Portfolio & Premium Services
-Use the CLI to build a personal portfolio. The CLI itself becomes the strongest portfolio piece — proof of Software Architect-level skills.

@@ -12,6 +12,7 @@
     "@restack/shared": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "hono": "^4.12.27",
     "next": "16.2.9",
     "radix-ui": "^1.6.1",
     "react": "19.2.4",
@@ -31,5 +32,8 @@
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

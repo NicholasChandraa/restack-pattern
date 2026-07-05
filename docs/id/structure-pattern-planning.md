@@ -20,7 +20,7 @@ restack-pattern/
 │   │
 │   ├── shared/                       # Kode global yang dapat digunakan kembali
 │   │   ├── components/ui/            # Komponen atomik Shadcn (Button, Input, dll.)
-│   │   ├── lib/api-client.ts         # Client RPC Hono + konfigurasi kredensial cookie
+│   │   ├── lib/api-client.ts         # Client RPC Hono (hc<AppType>) + konfigurasi kredensial cookie
 │   │   └── hooks/                   # Hook global (useTheme, useDebounce)
 │   │
 │   └── domains/                      # Inti arsitektur Semi-DDD

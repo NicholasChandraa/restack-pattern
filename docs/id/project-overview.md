@@ -21,17 +21,17 @@ Perintah ini akan men-generate monorepo yang siap digunakan untuk produksi (prod
 
 ## Tech Stack
 
-| Lapisan (Layer) | Teknologi |
-|---|---|
-| Frontend | Next.js (App Router) |
-| Backend | Hono |
-| Database ORM | Drizzle ORM |
-| Database | PostgreSQL (Neon) |
-| Validasi | Zod (dibagi bersama antara FE ↔ BE) |
-| Autentikasi | JWT di dalam cookie httpOnly |
-| Monorepo | pnpm workspaces (dapat ditambahkan Turborepo jika diperlukan) |
+| Lapisan (Layer) | Teknologi                                                            |
+| --------------- | -------------------------------------------------------------------- |
+| Frontend        | Next.js (App Router)                                                 |
+| Backend         | Hono                                                                 |
+| Database ORM    | Drizzle ORM                                                          |
+| Database        | PostgreSQL (Neon)                                                    |
+| Validasi        | Zod (dibagi bersama antara FE ↔ BE)                                  |
+| Autentikasi     | JWT di dalam cookie httpOnly                                         |
+| Monorepo        | pnpm workspaces (dapat ditambahkan Turborepo jika diperlukan)        |
 | Deploy Frontend | Penyedia hosting statis mana pun (Vercel, Netlify, Cloudflare Pages) |
-| Deploy Backend | Penyedia hosting Node.js mana pun (Railway, Render, Fly.io, VPS) |
+| Deploy Backend  | Penyedia hosting Node.js mana pun (Railway, Render, Fly.io, VPS)     |
 
 ---
 
@@ -52,6 +52,7 @@ domains/[feature]/
 ```
 
 **Aturan Lapisan (Layer Rules):**
+
 - `routes` → Memvalidasi input (menggunakan Zod schema dari `@restack/shared`), memanggil service, mengembalikan response HTTP.
 - `service` → Menangani logika bisnis saja, tidak pernah menyentuh DB secara langsung.
 - `repo` → Menangani query Drizzle saja, tidak mengandung logika bisnis.
@@ -63,7 +64,7 @@ domains/[feature]/
 app/                          # HANYA untuk routing (merender komponen domain)
 shared/
 ├── components/ui/            # Komponen atomik Shadcn (Button, Input, dll.)
-├── lib/api-client.ts         # Client RPC Hono
+├── lib/api-client.ts         # Client RPC Hono (hc<AppType>)
 └── hooks/                    # Hook global
 domains/[feature]/
 ├── components/               # UI khusus untuk fitur terkait
@@ -73,6 +74,7 @@ domains/[feature]/
 ```
 
 **Aturan Lapisan (Layer Rules):**
+
 - `app/page.tsx` → Hanya merender komponen domain utama, tidak mengandung logika UI lainnya.
 - `components` → Hanya merender UI saja, tidak melakukan fetching data secara langsung.
 - `hooks` → Menangani logika + state, tidak melakukan panggilan HTTP secara langsung.
@@ -85,9 +87,9 @@ domains/[feature]/
 Konfigurasi cookie beradaptasi secara otomatis dengan lingkungan:
 
 | Lingkungan (Environment) | SameSite | Secure |
-|---|---|---|
-| Development | Lax | false |
-| Production | None | true |
+| ------------------------ | -------- | ------ |
+| Development              | Lax      | false  |
+| Production               | None     | true   |
 
 Hal ini mengeliminasi masalah autentikasi yang paling umum terjadi ketika frontend dan backend di-deploy ke domain yang berbeda.
 
@@ -108,6 +110,7 @@ backend/src/domains/...     frontend/domains/...
 ## Fitur Utama: Structured & Correlation Logging
 
 Monorepo ini mengimplementasikan **logging terstruktur siap produksi (production-ready structured logging)** menggunakan **Pino** dan middleware Hono:
+
 - **Correlation ID (Request ID)**: UUID acak unik dihasilkan secara otomatis untuk setiap request HTTP yang masuk via middleware bawaan Hono `requestId`.
 - **Contextual Request Logger**: Logger turunan spesifik request (`logger.child({ requestId })`) diikat ke context Hono. Semua log di sepanjang alur request tersebut akan otomatis membawa `requestId` yang sama, mempermudah pelacakan (tracing) log di produksi tanpa tercampur aduk.
 - **Integrasi Konteks User**: Middleware autentikasi secara otomatis menyisipkan context `userId` ke dalam child logger setelah login terverifikasi. Setiap log yang dicetak di dalam rute terproteksi akan otomatis membawa label user yang melakukan request.
@@ -142,16 +145,3 @@ restack-pattern/
 │
 └── package.json                      # Workspace root pnpm
 ```
-
----
-
-## Rencana Perjalanan (Roadmap)
-
-### Fase 1 — Master Template
-Membangun monorepo secara manual. Mengimplementasikan domain Auth dari ujung-ke-ujung (register, login, logout). Deploy ke Vercel + Railway. Memverifikasi bahwa cookie berfungsi di produksi.
-
-### Fase 2 — CLI
-Mengubah master template menjadi script CLI yang dapat dijalankan melalui `npx create-restack-pattern`.
-
-### Fase 3 — Portofolio & Layanan Premium
-Menggunakan CLI ini untuk membuat portofolio pribadi. CLI itu sendiri akan menjadi karya portofolio terkuat — bukti keterampilan setingkat Software Architect.

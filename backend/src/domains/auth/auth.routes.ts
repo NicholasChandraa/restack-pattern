@@ -37,62 +37,58 @@ const clearAuthCookies = (c: Context) => {
 }
 
 export const authRoutes = new Hono<{ Variables: AppVariables }>()
+  .post("/register", zValidator("json", RegisterSchema), async (c) => {
+    const reqLogger = c.get("logger") || logger
+    try {
+      reqLogger.info("Starting user registration")
+      const body = c.req.valid("json")
+      const user = await authService.register(body)
+      const tokens = await authService.issueTokenPair(user)
 
-authRoutes.post("/register", zValidator("json", RegisterSchema), async (c) => {
-  const reqLogger = c.get("logger") || logger
-  try {
-    reqLogger.info("Starting user registration")
-    const body = c.req.valid("json")
-    const user = await authService.register(body)
-    const tokens = await authService.issueTokenPair(user)
+      setAuthCookies(c, tokens)
 
-    setAuthCookies(c, tokens)
+      return c.json({ user }, 201)
+    } catch (e: any) {
+      reqLogger.error({ err: e.message }, "Register failed")
+      return c.json({ error: e.message }, 400)
+    }
+  })
+  .post("/login", zValidator("json", LoginSchema), async (c) => {
+    const reqLogger = c.get("logger") || logger
+    try {
+      reqLogger.info("Attempting user login")
+      const body = c.req.valid("json")
+      const user = await authService.login(body)
+      const tokens = await authService.issueTokenPair(user)
 
-    return c.json({ user }, 201)
-  } catch (e: any) {
-    reqLogger.error({ err: e.message }, "Register failed")
-    return c.json({ error: e.message }, 400)
-  }
-})
+      setAuthCookies(c, tokens)
 
-authRoutes.post("/login", zValidator("json", LoginSchema), async (c) => {
-  const reqLogger = c.get("logger") || logger
-  try {
-    reqLogger.info("Attempting user login")
-    const body = c.req.valid("json")
-    const user = await authService.login(body)
-    const tokens = await authService.issueTokenPair(user)
+      return c.json({ user })
+    } catch (e: any) {
+      reqLogger.error({ err: e.message }, "Login failed")
+      return c.json({ error: e.message }, 401)
+    }
+  })
+  .post("/refresh", async (c) => {
+    const reqLogger = c.get("logger") || logger
+    const refreshToken = getCookie(c, "refresh_token")
+    if (!refreshToken) return c.json({ error: "Missing refresh token" }, 401)
 
-    setAuthCookies(c, tokens)
+    try {
+      reqLogger.info("Attempting token rotation")
+      const tokens = await authService.refresh(refreshToken)
+      setAuthCookies(c, tokens)
+      return c.json({ user: tokens.user })
+    } catch (e: any) {
+      clearAuthCookies(c)
+      reqLogger.error({ err: e.message }, "Refresh failed")
+      return c.json({ error: "Invalid refresh token" }, 401)
+    }
+  })
+  .post("/logout", async (c) => {
+    const refreshToken = getCookie(c, "refresh_token")
+    if (refreshToken) await authService.revokeSession(refreshToken)
 
-    return c.json({ user })
-  } catch (e: any) {
-    reqLogger.error({ err: e.message }, "Login failed")
-    return c.json({ error: e.message }, 401)
-  }
-})
-
-authRoutes.post("/refresh", async (c) => {
-  const reqLogger = c.get("logger") || logger
-  const refreshToken = getCookie(c, "refresh_token")
-  if (!refreshToken) return c.json({ error: "Missing refresh token" }, 401)
-
-  try {
-    reqLogger.info("Attempting token rotation")
-    const tokens = await authService.refresh(refreshToken)
-    setAuthCookies(c, tokens)
-    return c.json({ user: tokens.user })
-  } catch (e: any) {
     clearAuthCookies(c)
-    reqLogger.error({ err: e.message }, "Refresh failed")
-    return c.json({ error: "Invalid refresh token" }, 401)
-  }
-})
-
-authRoutes.post("/logout", async (c) => {
-  const refreshToken = getCookie(c, "refresh_token")
-  if (refreshToken) await authService.revokeSession(refreshToken)
-
-  clearAuthCookies(c)
-  return c.json({ success: true })
-})
+    return c.json({ success: true })
+  })

@@ -1,6 +1,7 @@
 {
   "name": "restack-pattern",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "dev": "pnpm --parallel dev",
     "build": "pnpm --parallel build"
@@ -9,5 +10,8 @@
     "frontend",
     "backend",
     "packages/*"
-  ]
+  ],
+  "engines": {
+    "node": ">=20"
+  }
 }

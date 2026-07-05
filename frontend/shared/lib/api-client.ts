@@ -1,73 +1,77 @@
-/**
- * Global HTTP client helper for frontend domains.
- * Wraps global fetch and configures default options such as content types,
- * credentials handling (sending HTTP cookies), and base API URL resolution.
- */
+import { hc } from "hono/client"
+import type { AppType } from "../../../backend/src/hono-app"
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"
 
-/**
- * Custom API Error wrapping utility.
- * Captures both the backend error message payload and the raw HTTP response status code.
- */
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(message: string, public status: number) {
     super(message)
   }
 }
 
-interface ApiErrorBody {
-  error?: string
-}
-
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
-    credentials: "include",
-  })
-
-  const contentType = res.headers.get("content-type")
-  const data: unknown =
-    contentType && contentType.includes("application/json")
-      ? await res.json()
-      : { error: (await res.text()) || "Request failed" }
-
-  if (!res.ok) throw new ApiError((data as ApiErrorBody).error ?? "Request failed", res.status)
-  return data as T
-}
-
-// The refresh token is single-use (backend rotates it atomically), so if several
-// requests 401 at once they must share one refresh call, not each fire their own —
-// only the first would succeed and the rest would wrongly fail as "logged out".
-let refreshPromise: Promise<unknown> | null = null
+// Share a single refresh request promise to prevent TOCTOU race conditions
+let refreshPromise: Promise<Response> | null = null
 
 function refreshSession() {
   if (!refreshPromise) {
-    refreshPromise = request("/api/auth/refresh", { method: "POST" }).finally(() => {
+    refreshPromise = fetch(`${BASE_URL}/api/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+    }).finally(() => {
       refreshPromise = null
     })
   }
   return refreshPromise
 }
 
-export async function apiClient<T>(
-  path: string,
-  options?: RequestInit
-): Promise<T> {
-  try {
-    return await request<T>(path, options)
-  } catch (e) {
-    // The access_token cookie is short-lived by design (15m). On a 401, silently
-    // exchange the refresh_token for a new pair once, then retry the original call.
-    // Auth routes are excluded so a failed refresh can't loop back into itself.
-    const isAuthRoute = path.startsWith("/api/auth/")
-    if (e instanceof ApiError && e.status === 401 && !isAuthRoute) {
-      await refreshSession()
-      return request<T>(path, options)
-    }
-    throw e
+const customFetch: typeof fetch = async (input, init) => {
+  const newInit = {
+    ...init,
+    credentials: "include" as const,
   }
+
+  const res = await fetch(input, newInit)
+
+  // Silently rotate access token on 401, unless it's the auth endpoints themselves
+  const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url
+  const isAuthRoute = url.includes("/api/auth/")
+
+  if (res.status === 401 && !isAuthRoute) {
+    const refreshRes = await refreshSession()
+    if (refreshRes.ok) {
+      // Retry the original request
+      return fetch(input, newInit)
+    }
+  }
+
+  return res
+}
+
+// Expose the Hono RPC client
+export const client = hc<AppType>(BASE_URL, { fetch: customFetch })
+
+interface ApiErrorBody {
+  error?: string
+}
+
+interface RpcResult {
+  ok: boolean
+  status: number
+  json(): Promise<unknown>
+}
+
+// Unwrap Hono RPC response helper to parse JSON or throw formatted ApiError
+export async function unwrap<T>(promise: Promise<RpcResult>): Promise<T> {
+  const res = await promise
+  if (!res.ok) {
+    let errorMsg = "Request failed"
+    try {
+      const data = (await res.json()) as ApiErrorBody
+      errorMsg = data.error ?? errorMsg
+    } catch {
+      // fallback
+    }
+    throw new ApiError(errorMsg, res.status)
+  }
+  return res.json() as Promise<T>
 }

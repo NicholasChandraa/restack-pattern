@@ -1,5 +1,5 @@
 import type { AuthUser, UpdateProfileInput } from "@restack/shared"
-import { apiClient } from "@/shared/lib/api-client"
+import { client, unwrap } from "@/shared/lib/api-client"
 
 /**
  * Service API layer for the User domain.
@@ -11,11 +11,9 @@ import { apiClient } from "@/shared/lib/api-client"
  * - Request and response structures are mapped using schemas shared from `@restack/shared`.
  */
 export const userApi = {
-  me: () => apiClient<{ user: AuthUser }>("/api/user/me"),
+  me: () =>
+    unwrap<{ user: AuthUser }>(client.api.user.me.$get()),
 
   updateProfile: (data: UpdateProfileInput) =>
-    apiClient<{ user: AuthUser }>("/api/user/profile", {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
+    unwrap<{ user: AuthUser }>(client.api.user.profile.$put({ json: data })),
 }

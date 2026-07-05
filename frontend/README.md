@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RestackPattern - Frontend App (Next.js)
 
-## Getting Started
+This is the Next.js 16 (App Router) frontend app for the RestackPattern monorepo. It uses a Semi-DDD folder structure, vanilla CSS, and connects to Hono through its official RPC client (`hc<AppType>`), giving end-to-end type inference on every request/response without manually declaring types.
 
-First, run the development server:
+## Directory Structure (Semi-DDD)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Code is structured by business domain/feature:
+
+```
+src/
+├── app/                     # Routing configs, layouts, pages (no complex JSX/state here!)
+├── shared/                  # Reusable components, client wrappers, hooks
+│   ├── components/ui/       # Component primitives (e.g. Shadcn atoms)
+│   └── lib/api-client.ts    # Hono RPC client (hc<AppType>) + auto session refresh
+└── domains/
+    ├── auth/                # Login/Register components, auth services, hooks
+    └── user/                # User profile UI components, hooks
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Folder Rules:
+- `app/` is strictly for routing and page wrappers. Do not implement complex forms, state, or layouts directly here. Always delegate rendering to domain feature components.
+- `domains/[feature]/components` - UI components specific to the business feature.
+- `domains/[feature]/hooks` - Handles fetching, mutations, and local state.
+- `domains/[feature]/services` - Small wrappers making API requests.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Development
 
-## Learn More
+Ensure the backend API is running at `http://localhost:3001`.
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# 1. Optional - configure environment variables (defaults to localhost:3001)
+cp .env.example .env
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 2. Start Next.js development server
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Dev server will run at [http://localhost:3000](http://localhost:3000).
+- Runs with Turbopack enabled for lightning-fast hot reloading.

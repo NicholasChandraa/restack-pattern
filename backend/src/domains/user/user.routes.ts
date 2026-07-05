@@ -15,11 +15,6 @@ import { logger, type AppVariables } from "../../shared/logger/logger.js"
  *   apply guards (requireAuth), and serialize JSON responses.
  * - Routing code should never implement business logic directly; it must delegate to the service layer.
  */
-export const userRoutes = new Hono<{ Variables: AppVariables }>()
-
-// Only UserNotFoundError is an expected, safe-to-expose outcome. Anything else (DB/driver
-// errors, etc.) gets logged with detail but returned to the caller as a generic 500 —
-// leaking raw error messages/mislabeling unexpected failures as 404 would be misleading.
 const handleProfileError = (c: Context<{ Variables: AppVariables }>, e: unknown, action: string) => {
   if (e instanceof UserNotFoundError) return c.json({ error: e.message }, 404)
   const reqLogger = c.get("logger") || logger
@@ -27,29 +22,29 @@ const handleProfileError = (c: Context<{ Variables: AppVariables }>, e: unknown,
   return c.json({ error: "Internal server error" }, 500)
 }
 
-userRoutes.get("/me", requireAuth, async (c) => {
-  const reqLogger = c.get("logger") || logger
-  try {
-    reqLogger.info("Retrieving authenticated user profile")
-    const user = c.get("user")
-    if (!user) return c.json({ error: "Unauthorized" }, 401)
-    const profile = await userService.getProfile(Number(user.sub))
-    return c.json({ user: profile })
-  } catch (e) {
-    return handleProfileError(c, e, "Get profile failed")
-  }
-})
-
-userRoutes.put("/profile", requireAuth, zValidator("json", UpdateProfileSchema), async (c) => {
-  const reqLogger = c.get("logger") || logger
-  try {
-    const body = c.req.valid("json")
-    reqLogger.info("Updating user profile")
-    const user = c.get("user")
-    if (!user) return c.json({ error: "Unauthorized" }, 401)
-    const profile = await userService.updateProfile(Number(user.sub), body)
-    return c.json({ user: profile })
-  } catch (e) {
-    return handleProfileError(c, e, "Update profile failed")
-  }
-})
+export const userRoutes = new Hono<{ Variables: AppVariables }>()
+  .get("/me", requireAuth, async (c) => {
+    const reqLogger = c.get("logger") || logger
+    try {
+      reqLogger.info("Retrieving authenticated user profile")
+      const user = c.get("user")
+      if (!user) return c.json({ error: "Unauthorized" }, 401)
+      const profile = await userService.getProfile(Number(user.sub))
+      return c.json({ user: profile })
+    } catch (e) {
+      return handleProfileError(c, e, "Get profile failed")
+    }
+  })
+  .put("/profile", requireAuth, zValidator("json", UpdateProfileSchema), async (c) => {
+    const reqLogger = c.get("logger") || logger
+    try {
+      const body = c.req.valid("json")
+      reqLogger.info("Updating user profile")
+      const user = c.get("user")
+      if (!user) return c.json({ error: "Unauthorized" }, 401)
+      const profile = await userService.updateProfile(Number(user.sub), body)
+      return c.json({ user: profile })
+    } catch (e) {
+      return handleProfileError(c, e, "Update profile failed")
+    }
+  })

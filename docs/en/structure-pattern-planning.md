@@ -20,7 +20,7 @@ restack-pattern/
 │   │
 │   ├── shared/                       # Global reusables
 │   │   ├── components/ui/            # Shadcn atoms (Button, Input, etc.)
-│   │   ├── lib/api-client.ts         # Hono RPC client + credentials config
+│   │   ├── lib/api-client.ts         # Hono RPC client (hc<AppType>) + credentials config
 │   │   └── hooks/                   # Global hooks (useTheme, useDebounce)
 │   │
 │   └── domains/                      # Semi-DDD core

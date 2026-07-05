@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { apiClient } from "../lib/api-client"
+import { client, unwrap } from "../lib/api-client"
 
 /**
  * Client-side auth gate for pages with no data fetch of their own to piggyback
@@ -15,7 +15,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
   const [checked, setChecked] = useState(false)
 
   useEffect(() => {
-    apiClient("/api/user/me")
+    unwrap(client.api.user.me.$get())
       .then(() => setChecked(true))
       .catch(() => router.replace("/login"))
   }, [router])

@@ -1,5 +1,5 @@
 import type { AuthUser, LoginInput, RegisterInput } from "@restack/shared"
-import { apiClient } from "@/shared/lib/api-client"
+import { client, unwrap } from "@/shared/lib/api-client"
 
 /**
  * Service API layer for the Auth domain.
@@ -11,17 +11,11 @@ import { apiClient } from "@/shared/lib/api-client"
  */
 export const authApi = {
   register: (data: RegisterInput) =>
-    apiClient<{ user: AuthUser }>("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+    unwrap<{ user: AuthUser }>(client.api.auth.register.$post({ json: data })),
 
   login: (data: LoginInput) =>
-    apiClient<{ user: AuthUser }>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+    unwrap<{ user: AuthUser }>(client.api.auth.login.$post({ json: data })),
 
   logout: () =>
-    apiClient<{ success: boolean }>("/api/auth/logout", { method: "POST" }),
+    unwrap<{ success: boolean }>(client.api.auth.logout.$post()),
 }

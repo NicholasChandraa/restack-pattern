@@ -100,7 +100,7 @@ Next steps to get started:
        (Open backend/.env and set \x1b[33mDATABASE_URL\x1b[0m and a min-32-chars \x1b[33mJWT_SECRET\x1b[0m)
 
      • For Frontend:
-       \x1b[36mcp frontend/.env.example frontend/.env.local\x1b[0m
+       \x1b[36mcp frontend/.env.example frontend/.env\x1b[0m
 
   3. Push database tables (creates users & auth_sessions tables):
      \x1b[36mpnpm --filter backend db:push\x1b[0m
