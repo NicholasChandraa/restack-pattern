@@ -39,3 +39,5 @@ test-app/
 # Exclude concerns and root CLAUDE.md from git
 docs/concerns.md
 CLAUDE.md
+
+docs/tutorial.md
