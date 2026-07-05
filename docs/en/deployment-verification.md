@@ -10,7 +10,7 @@ Vercel's Neon integration).
 Unlike a typical Next.js template, there is **no `middleware.ts`/`proxy.ts`**. Protected pages
 check auth client-side instead — `frontend/domains/user/hooks/use-profile.ts` and
 `frontend/components/require-auth.tsx` both call `GET /api/user/me` on mount and redirect
-to `/login` on failure. This is deliberate (see `CLAUDE.md`'s Next.js 16 caveat): a server-side
+to `/login` on failure. This is deliberate (see `DEVELOPMENT.md`'s Next.js 16 caveat): a server-side
 cookie-presence check cannot work once frontend and backend are on different domains (the normal
 case in production — see below), so rather than maintain two different behaviors for two
 deployment shapes, the same client-side check is used in both. Trade-off: pages render first,

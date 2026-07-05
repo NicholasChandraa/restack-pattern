@@ -1,6 +1,6 @@
-# CLAUDE.md
+# DEVELOPMENT.md
 
-This file provides architecture, build, and styling guidance to Claude Code (claude.ai/code) and other AI assistants working in this repository.
+This document outlines the architecture, build guidelines, and code conventions for the Restack Pattern monorepo. All developers and automated tools contributing to this project must follow these rules.
 
 ## Project Stack
 - **Frontend**: Next.js 16 (App Router)

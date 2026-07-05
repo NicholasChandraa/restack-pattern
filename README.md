@@ -90,7 +90,7 @@ my-app/
 └── docs/                     # Architecture notes, deploy checklists
 ```
 
-See [`CLAUDE.md`](./CLAUDE.md) for the full layer-by-layer breakdown, cross-domain import rules, and design details.
+See [`DEVELOPMENT.md`](./DEVELOPMENT.md) for the full layer-by-layer breakdown, cross-domain import rules, and design details.
 
 ### 2. Auth Flow (Dual-Cookie Refresh Tokens)
 

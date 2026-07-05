@@ -3,7 +3,7 @@
 A practical guide to working in this repo day to day: what each folder is for, how pnpm workspaces
 tie them together, how to run and test things locally, and how to deploy the template / publish the
 CLI when you're ready. For architectural rules (Semi-DDD, cross-domain imports, auth design), see
-`CLAUDE.md` — this guide is about *workflow*, that one is about *rules*.
+`DEVELOPMENT.md` — this guide is about *workflow*, that one is about *rules*.
 
 ## 1. Project structure
 
@@ -127,7 +127,7 @@ Code is grouped by **business feature (domain)**, not file type — `backend/src
 `services/`. Zod schemas live once in `packages/shared/src/schemas/`, imported by both sides — the
 schema is never duplicated. `auth` may import from `user`; never the reverse. Full rules and the
 reasoning behind specific decisions (dual-cookie refresh tokens, timing-safe login, no
-`middleware.ts`) are in `CLAUDE.md` — read that before touching auth code.
+`middleware.ts`) are in `DEVELOPMENT.md` — read that before touching auth code.
 
 ## 5. Working on the CLI package (`packages/create-restack-pattern`)
 
@@ -237,7 +237,7 @@ renamed `gitignore` placeholder — see §5).
   cleanup, deferred CLI prompts for package manager/DB/OAuth choice, etc.) are tracked in
   `docs/concerns.md`, not duplicated here — check it before assuming something is finished, and
   add to it when you knowingly defer something.
-- **This file vs. others**: `CLAUDE.md` is the architectural contract (rules an AI assistant or a
+- **This file vs. others**: `DEVELOPMENT.md` is the architectural contract (rules an AI assistant or a
   new contributor must follow); `docs/concerns.md` is the living backlog of open/deferred
   decisions; `docs/deployment-verification.md` is deploy specifics with real verification
   timestamps. Update whichever one actually changed — don't let this file drift into duplicating

@@ -1,6 +1,6 @@
 # Panduan Pengembangan
 
-Panduan praktis untuk bekerja di repositori ini sehari-hari: fungsi dari setiap folder, bagaimana pnpm workspaces menghubungkannya, cara menjalankan dan menguji proyek secara lokal, cara men-deploy templat, dan cara mempublikasikan CLI saat Anda siap. Untuk aturan arsitektur (Semi-DDD, aturan impor lintas domain, desain autentikasi), silakan lihat `CLAUDE.md` — panduan ini berfokus pada *alur kerja (workflow)*, sedangkan dokumen tersebut berfokus pada *aturan arsitektur*.
+Panduan praktis untuk bekerja di repositori ini sehari-hari: fungsi dari setiap folder, bagaimana pnpm workspaces menghubungkannya, cara menjalankan dan menguji proyek secara lokal, cara men-deploy templat, dan cara mempublikasikan CLI saat Anda siap. Untuk aturan arsitektur (Semi-DDD, aturan impor lintas domain, desain autentikasi), silakan lihat `DEVELOPMENT.md` — panduan ini berfokus pada *alur kerja (workflow)*, sedangkan dokumen tersebut berfokus pada *aturan arsitektur*.
 
 ## 1. Struktur Proyek
 
@@ -98,7 +98,7 @@ authRoutes.post("/login", async (c) => {
 
 ## 4. Penjelasan Singkat Arsitektur
 
-Kode dikelompokkan berdasarkan **fitur bisnis (domain)**, bukan tipe file — `backend/src/domains/auth/`, `backend/src/domains/user/`, `frontend/domains/auth/`, dll. Domain backend dibagi menjadi `.routes.ts` (HTTP + validasi), `.service.ts` (logika bisnis), `.repo.ts` (query Drizzle), dan `.model.ts` (definisi tabel). Domain frontend dibagi menjadi `components/`, `hooks/`, dan `services/`. Zod schemas didefinisikan sekali di `packages/shared/src/schemas/` dan diimpor oleh kedua belah pihak. Domain `auth` boleh mengimpor dari `user`, tetapi arah sebaliknya dilarang. Aturan lengkap serta alasan di balik keputusan arsitektur (dual-cookie refresh token, timing-safe login, tanpa `middleware.ts`) dapat dibaca di `CLAUDE.md`.
+Kode dikelompokkan berdasarkan **fitur bisnis (domain)**, bukan tipe file — `backend/src/domains/auth/`, `backend/src/domains/user/`, `frontend/domains/auth/`, dll. Domain backend dibagi menjadi `.routes.ts` (HTTP + validasi), `.service.ts` (logika bisnis), `.repo.ts` (query Drizzle), dan `.model.ts` (definisi tabel). Domain frontend dibagi menjadi `components/`, `hooks/`, dan `services/`. Zod schemas didefinisikan sekali di `packages/shared/src/schemas/` dan diimpor oleh kedua belah pihak. Domain `auth` boleh mengimpor dari `user`, tetapi arah sebaliknya dilarang. Aturan lengkap serta alasan di balik keputusan arsitektur (dual-cookie refresh token, timing-safe login, tanpa `middleware.ts`) dapat dibaca di `DEVELOPMENT.md`.
 
 ## 5. Bekerja pada CLI Package (`packages/create-restack-pattern`)
 

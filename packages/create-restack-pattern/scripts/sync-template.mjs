@@ -2,7 +2,7 @@
 // Copies the live Phase 1 template (frontend/backend/packages/shared + root
 // config) into packages/create-restack-pattern/template/, excluding
 // build artifacts, secrets, and this template's own internal planning docs
-// (docs/, root CLAUDE.md) which aren't relevant to a generated project.
+// (docs/) which aren't relevant to a generated project.
 import { cpSync, rmSync, mkdirSync, existsSync, readdirSync, renameSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
@@ -39,8 +39,7 @@ const SOURCES = [
   ["package.json", "package.json"],
   ["pnpm-workspace.yaml", "pnpm-workspace.yaml"],
   [".gitignore", ".gitignore"],
-  ["CLAUDE_TEMPLATE.md", "CLAUDE.md"],
-  ["CLAUDE_TEMPLATE.md", "AGENTS.md"],
+  ["DEVELOPMENT.md", "DEVELOPMENT.md"],
 ]
 
 if (existsSync(templateDir)) rmSync(templateDir, { recursive: true, force: true })
