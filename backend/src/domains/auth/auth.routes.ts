@@ -39,7 +39,9 @@ const clearAuthCookies = (c: Context) => {
 export const authRoutes = new Hono<{ Variables: AppVariables }>()
 
 authRoutes.post("/register", zValidator("json", RegisterSchema), async (c) => {
+  const reqLogger = c.get("logger") || logger
   try {
+    reqLogger.info("Starting user registration")
     const body = c.req.valid("json")
     const user = await authService.register(body)
     const tokens = await authService.issueTokenPair(user)
@@ -48,14 +50,15 @@ authRoutes.post("/register", zValidator("json", RegisterSchema), async (c) => {
 
     return c.json({ user }, 201)
   } catch (e: any) {
-    const reqLogger = c.get("logger") || logger
     reqLogger.error({ err: e.message }, "Register failed")
     return c.json({ error: e.message }, 400)
   }
 })
 
 authRoutes.post("/login", zValidator("json", LoginSchema), async (c) => {
+  const reqLogger = c.get("logger") || logger
   try {
+    reqLogger.info("Attempting user login")
     const body = c.req.valid("json")
     const user = await authService.login(body)
     const tokens = await authService.issueTokenPair(user)
@@ -64,23 +67,23 @@ authRoutes.post("/login", zValidator("json", LoginSchema), async (c) => {
 
     return c.json({ user })
   } catch (e: any) {
-    const reqLogger = c.get("logger") || logger
     reqLogger.error({ err: e.message }, "Login failed")
     return c.json({ error: e.message }, 401)
   }
 })
 
 authRoutes.post("/refresh", async (c) => {
+  const reqLogger = c.get("logger") || logger
   const refreshToken = getCookie(c, "refresh_token")
   if (!refreshToken) return c.json({ error: "Missing refresh token" }, 401)
 
   try {
+    reqLogger.info("Attempting token rotation")
     const tokens = await authService.refresh(refreshToken)
     setAuthCookies(c, tokens)
     return c.json({ user: tokens.user })
   } catch (e: any) {
     clearAuthCookies(c)
-    const reqLogger = c.get("logger") || logger
     reqLogger.error({ err: e.message }, "Refresh failed")
     return c.json({ error: "Invalid refresh token" }, 401)
   }
