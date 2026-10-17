@@ -1,5 +1,5 @@
 import "dotenv/config"
-import { z } from "zod";
+import { z } from "zod"
 
 const envSchema = z.object({
   // Memastikan DATABASE_URL ada dan berformat URL valid

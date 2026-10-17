@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest"
 import bcrypt from "bcryptjs"
-import { authService } from "./auth.service.js"
-import { authRepo } from "./auth.repo.js"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { userRepo } from "../user/user.repo.js"
+import { authRepo } from "./auth.repo.js"
+import { authService } from "./auth.service.js"
 
 vi.mock("./auth.repo.js", () => ({
   authRepo: {
@@ -24,16 +24,32 @@ vi.mock("../user/user.repo.js", () => ({
 const mockedAuthRepo = vi.mocked(authRepo, true)
 const mockedUserRepo = vi.mocked(userRepo, true)
 
-const dbUser = (overrides: Partial<{ id: number; name: string; email: string; password: string }> = {}) => ({
+const dbUser = (
+  overrides: Partial<{
+    id: number
+    name: string
+    email: string
+    password: string
+    role: string
+  }> = {},
+) => ({
   id: 1,
   name: "X",
   email: "a@b.com",
   password: "hash",
+  role: "user",
   createdAt: new Date(),
   ...overrides,
 })
 
-const dbSession = (overrides: Partial<{ id: number; userId: number; refreshTokenHash: string; expiresAt: Date }> = {}) => ({
+const dbSession = (
+  overrides: Partial<{
+    id: number
+    userId: number
+    refreshTokenHash: string
+    expiresAt: Date
+  }> = {},
+) => ({
   id: 1,
   userId: 1,
   refreshTokenHash: "hash",
@@ -50,7 +66,7 @@ describe("authService.register", () => {
   it("throws if the email is already in use", async () => {
     mockedAuthRepo.findByEmail.mockResolvedValue(dbUser())
     await expect(
-      authService.register({ name: "X", email: "a@b.com", password: "password123" })
+      authService.register({ name: "X", email: "a@b.com", password: "password123" }),
     ).rejects.toThrow("Email already in use")
   })
 
@@ -58,9 +74,13 @@ describe("authService.register", () => {
     mockedAuthRepo.findByEmail.mockResolvedValue(null)
     mockedAuthRepo.create.mockImplementation(async (data) => dbUser(data))
 
-    const user = await authService.register({ name: "X", email: "  A@B.com  ", password: "password123" })
+    const user = await authService.register({
+      name: "X",
+      email: "  A@B.com  ",
+      password: "password123",
+    })
 
-    expect(user).toEqual({ id: 1, name: "X", email: "a@b.com" })
+    expect(user).toEqual({ id: 1, name: "X", email: "a@b.com", role: "user" })
     const createdArg = mockedAuthRepo.create.mock.calls[0][0]
     expect(createdArg.email).toBe("a@b.com")
     expect(createdArg.password).not.toBe("password123")
@@ -70,24 +90,24 @@ describe("authService.register", () => {
 describe("authService.login", () => {
   it("throws on an unknown email", async () => {
     mockedAuthRepo.findByEmail.mockResolvedValue(null)
-    await expect(authService.login({ email: "nope@example.com", password: "whatever1" })).rejects.toThrow(
-      "Invalid credentials"
-    )
+    await expect(
+      authService.login({ email: "nope@example.com", password: "whatever1" }),
+    ).rejects.toThrow("Invalid credentials")
   })
 
   it("throws on a wrong password", async () => {
     const passwordHash = await bcrypt.hash("correct-password", 4)
     mockedAuthRepo.findByEmail.mockResolvedValue(dbUser({ password: passwordHash }))
-    await expect(authService.login({ email: "a@b.com", password: "wrong-password" })).rejects.toThrow(
-      "Invalid credentials"
-    )
+    await expect(
+      authService.login({ email: "a@b.com", password: "wrong-password" }),
+    ).rejects.toThrow("Invalid credentials")
   })
 
   it("returns the public user shape on correct credentials", async () => {
     const passwordHash = await bcrypt.hash("correct-password", 4)
     mockedAuthRepo.findByEmail.mockResolvedValue(dbUser({ password: passwordHash }))
     const user = await authService.login({ email: "a@b.com", password: "correct-password" })
-    expect(user).toEqual({ id: 1, name: "X", email: "a@b.com" })
+    expect(user).toEqual({ id: 1, name: "X", email: "a@b.com", role: "user" })
   })
 })
 
@@ -104,7 +124,7 @@ describe("authService.refresh", () => {
 
     const result = await authService.refresh("old-token")
 
-    expect(result.user).toEqual({ id: 1, name: "X", email: "a@b.com" })
+    expect(result.user).toEqual({ id: 1, name: "X", email: "a@b.com", role: "user" })
     expect(typeof result.accessToken).toBe("string")
     expect(typeof result.refreshToken).toBe("string")
     expect(mockedAuthRepo.createSession).toHaveBeenCalledTimes(1)
@@ -127,17 +147,29 @@ describe("authService.revokeSession", () => {
 describe("authService.verifyAccessToken", () => {
   it("round-trips a token issued by issueTokenPair", async () => {
     mockedAuthRepo.createSession.mockResolvedValue(dbSession())
-    const { accessToken } = await authService.issueTokenPair({ id: 1, name: "X", email: "a@b.com" })
+    const { accessToken } = await authService.issueTokenPair({
+      id: 1,
+      name: "X",
+      email: "a@b.com",
+      role: "user",
+    })
     const payload = await authService.verifyAccessToken(accessToken)
     expect(payload.sub).toBe("1")
     expect(payload.email).toBe("a@b.com")
+    expect(payload.role).toBe("user")
   })
 
   it("rejects a tampered token", async () => {
     mockedAuthRepo.createSession.mockResolvedValue(dbSession())
-    const { accessToken } = await authService.issueTokenPair({ id: 1, name: "X", email: "a@b.com" })
+    const { accessToken } = await authService.issueTokenPair({
+      id: 1,
+      name: "X",
+      email: "a@b.com",
+      role: "user",
+    })
     const i = accessToken.indexOf(".") + 5
-    const tampered = accessToken.slice(0, i) + (accessToken[i] === "a" ? "b" : "a") + accessToken.slice(i + 1)
+    const tampered =
+      accessToken.slice(0, i) + (accessToken[i] === "a" ? "b" : "a") + accessToken.slice(i + 1)
     await expect(authService.verifyAccessToken(tampered)).rejects.toThrow()
   })
 })

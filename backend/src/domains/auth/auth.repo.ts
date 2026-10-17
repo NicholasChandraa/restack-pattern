@@ -9,7 +9,7 @@ type SessionRow = typeof authSessionsTable.$inferSelect
 /**
  * Repository layer for the Auth domain.
  * Encapsulates sessions management and credential-based queries.
- * 
+ *
  * Semi-DDD rules:
  * - Direct database interactions (Drizzle client) must live only inside `.repo.ts` files.
  * - Under cross-domain rules, the Auth domain can query the User domain's tables (e.g. `usersTable`)
@@ -24,13 +24,24 @@ export const authRepo = {
     return user ?? null
   },
 
-  create: async (data: { name: string; email: string; password: string }) => {
+  create: async (data: {
+    name: string
+    email: string
+    password: string
+    role?: string
+  }): Promise<UserRow> => {
     const [user] = await db.insert(usersTable).values(data).returning()
+    if (!user) throw new Error("Failed to create user record")
     return user
   },
 
-  createSession: async (data: { userId: number; refreshTokenHash: string; expiresAt: Date }) => {
+  createSession: async (data: {
+    userId: number
+    refreshTokenHash: string
+    expiresAt: Date
+  }): Promise<SessionRow> => {
     const [session] = await db.insert(authSessionsTable).values(data).returning()
+    if (!session) throw new Error("Failed to create auth session")
     return session
   },
 
@@ -40,12 +51,19 @@ export const authRepo = {
   consumeSessionByHash: async (refreshTokenHash: string): Promise<SessionRow | null> => {
     const [session] = await db
       .delete(authSessionsTable)
-      .where(and(eq(authSessionsTable.refreshTokenHash, refreshTokenHash), gt(authSessionsTable.expiresAt, new Date())))
+      .where(
+        and(
+          eq(authSessionsTable.refreshTokenHash, refreshTokenHash),
+          gt(authSessionsTable.expiresAt, new Date()),
+        ),
+      )
       .returning()
     return session ?? null
   },
 
   deleteSessionByHash: async (refreshTokenHash: string) => {
-    await db.delete(authSessionsTable).where(eq(authSessionsTable.refreshTokenHash, refreshTokenHash))
+    await db
+      .delete(authSessionsTable)
+      .where(eq(authSessionsTable.refreshTokenHash, refreshTokenHash))
   },
 }

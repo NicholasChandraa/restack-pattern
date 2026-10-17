@@ -4,7 +4,7 @@ import logo from "@/public/logo.png"
 
 /**
  * Next.js Router Page: Register
- * 
+ *
  * Semi-DDD rules:
  * - Files in `frontend/app/` are strictly for layout, routing config, metadata, or entry gates.
  * - Do not implement custom JSX layouts, forms, state, or complex components here.

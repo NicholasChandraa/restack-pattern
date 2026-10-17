@@ -1,16 +1,16 @@
-import bcrypt from "bcryptjs"
-import { SignJWT, jwtVerify } from "jose"
-import { randomBytes, createHash } from "node:crypto"
+import { createHash, randomBytes } from "node:crypto"
 import type { AuthUser, LoginInput, RegisterInput } from "@restack/shared"
+import bcrypt from "bcryptjs"
+import { jwtVerify, SignJWT } from "jose"
 import { env } from "../../config/env.js"
-import { authRepo } from "./auth.repo.js"
 import { userRepo } from "../user/user.repo.js"
+import { authRepo } from "./auth.repo.js"
 import type { AuthTokenPayload } from "./auth.types.js"
 
 /**
  * Service layer for the Auth domain.
  * Houses core validation and cryptographic flows (JWT token signing, refresh token generation, hashing).
- * 
+ *
  * Semi-DDD rules:
  * - `.service.ts` files encapsulate business rules and complex workflows (e.g. session issuance & rotation).
  * - They must never call Drizzle ORM directly; always interact through the repo layer.
@@ -24,12 +24,17 @@ const normalizeEmail = (email: string) => email.trim().toLowerCase()
 export const ACCESS_TOKEN_TTL_SECONDS = 60 * 15 // 15 minutes
 export const REFRESH_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 30 // 30 days
 
-const buildTokenPayload = (user: { id: number; email: string }): AuthTokenPayload => ({
+const buildTokenPayload = (user: {
+  id: number
+  email: string
+  role: string
+}): AuthTokenPayload => ({
   sub: String(user.id),
   email: user.email,
+  role: user.role,
 })
 
-const signAccessToken = (user: { id: number; email: string }) =>
+const signAccessToken = (user: { id: number; email: string; role: string }) =>
   new SignJWT(buildTokenPayload(user))
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -60,7 +65,7 @@ export const authService = {
 
     const password = await bcrypt.hash(data.password, BCRYPT_COST)
     const user = await authRepo.create({ ...data, email, password })
-    return { id: user.id, name: user.name, email: user.email }
+    return { id: user.id, name: user.name, email: user.email, role: user.role }
   },
 
   login: async (data: LoginInput): Promise<AuthUser> => {
@@ -68,7 +73,7 @@ export const authService = {
     const valid = await bcrypt.compare(data.password, user ? user.password : DUMMY_HASH)
     if (!user || !valid) throw new Error("Invalid credentials")
 
-    return { id: user.id, name: user.name, email: user.email }
+    return { id: user.id, name: user.name, email: user.email, role: user.role }
   },
 
   issueTokenPair,
@@ -83,7 +88,7 @@ export const authService = {
     const user = await userRepo.findById(session.userId)
     if (!user) throw new Error("Invalid refresh token")
 
-    return issueTokenPair({ id: user.id, name: user.name, email: user.email })
+    return issueTokenPair({ id: user.id, name: user.name, email: user.email, role: user.role })
   },
 
   revokeSession: async (refreshToken: string) => {

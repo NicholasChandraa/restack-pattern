@@ -1,17 +1,24 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useLogin } from "../hooks/use-login"
 
 /**
  * LoginForm UI Component (Auth Domain).
  * Handles rendering the login form and calling the `useLogin` hook.
- * 
+ *
  * Semi-DDD rules:
  * - UI components should stay isolated from direct backend API fetching logic.
  * - Local react state controls input values, and mutation runs through the domain hook.

@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import type { ZodType } from "zod"
 
 /**
@@ -9,7 +9,10 @@ import type { ZodType } from "zod"
  * Standardizes Zod input validation, pending state tracking, error handling,
  * and automatic client-side redirection on successful mutation.
  */
-export function useAuthMutation<TInput>(schema: ZodType<TInput>, mutate: (data: TInput) => Promise<unknown>) {
+export function useAuthMutation<TInput>(
+  schema: ZodType<TInput>,
+  mutate: (data: TInput) => Promise<unknown>,
+) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isPending, setIsPending] = useState(false)
@@ -17,7 +20,7 @@ export function useAuthMutation<TInput>(schema: ZodType<TInput>, mutate: (data: 
   const submit = async (data: TInput) => {
     const parsed = schema.safeParse(data)
     if (!parsed.success) {
-      setError(parsed.error.issues[0].message)
+      setError(parsed.error.issues[0]?.message ?? "Validation failed")
       return
     }
 

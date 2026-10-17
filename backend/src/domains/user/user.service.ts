@@ -7,16 +7,22 @@ export class UserNotFoundError extends Error {}
  * Maps database user object into the public, safe schema shape.
  * Always filters out sensitive columns like password hashes.
  */
-const toPublicUser = (user: { id: number; name: string; email: string }): AuthUser => ({
+const toPublicUser = (user: {
+  id: number
+  name: string
+  email: string
+  role: string
+}): AuthUser => ({
   id: user.id,
   name: user.name,
   email: user.email,
+  role: user.role,
 })
 
 /**
  * Service layer for the User domain.
  * Contains core business logic and validations.
- * 
+ *
  * Semi-DDD rules:
  * - `.service.ts` encapsulates business logic, mappings, and validations.
  * - It must never interact with the database client directly; always query through the `.repo.ts` layer.

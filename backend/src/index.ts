@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server"
 import { env } from "./config/env.js"
-import { logger } from "./utils/logger.js"
 import { app } from "./hono-app.js"
+import { logger } from "./utils/logger.js"
 
 /**
  * Local dev / persistent-server entry point (tsx watch, Railway, Render, any VPS).

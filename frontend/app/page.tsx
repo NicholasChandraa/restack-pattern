@@ -1,11 +1,11 @@
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import logo from "@/public/logo.png"
 
 /**
  * Next.js Router Page: Landing Page (root)
- * 
+ *
  * Semi-DDD rules:
  * - Files in `frontend/app/` are strictly for layout, routing config, metadata, or entry gates.
  * - Do not implement custom JSX layouts, forms, state, or complex components here.

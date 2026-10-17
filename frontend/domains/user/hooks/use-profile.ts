@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import type { AuthUser } from "@restack/shared"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { userApi } from "../services/user.api"
 
 /**

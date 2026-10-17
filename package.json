@@ -4,7 +4,10 @@
   "license": "MIT",
   "scripts": {
     "dev": "pnpm --parallel dev",
-    "build": "pnpm --parallel build"
+    "build": "pnpm --parallel build",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test:e2e": "e2e run"
   },
   "workspaces": [
     "frontend",
@@ -13,5 +16,10 @@
   ],
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "@e2e-dev/web": "^0.15.2",
+    "e2e": "^0.21.2"
   }
 }

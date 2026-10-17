@@ -3,17 +3,20 @@
 This document outlines the architecture, build guidelines, and code conventions for the Restack Pattern monorepo. All developers and automated tools contributing to this project must follow these rules.
 
 ## Project Stack
-- **Frontend**: Next.js 16 (App Router)
+- **Frontend**: Next.js 16 (App Router with Turbopack & Typed Routes)
 - **Backend**: Hono
 - **ORM**: Drizzle ORM
-- **Database**: PostgreSQL (Postgres-js driver)
+- **Databases**: PostgreSQL (`postgres-js`) & SQLite (`better-sqlite3`)
+- **Primary Keys**: RFC 9562 UUIDv7 or Serial Auto-Increment
 - **Validation**: Zod (shared schemas)
-- **Package Manager**: pnpm workspaces
+- **Quality**: Biome v2 (sub-50ms linter & formatter)
+- **Package Manager**: pnpm workspaces (also supports npm & bun)
 
 ## Monorepo Layout
 - `frontend/` — Next.js 16 App Router
 - `backend/` — Hono API
-- `packages/shared/` — Shared Zod schemas (the single source of truth)
+- `packages/shared/` — Shared Zod schemas and utilities (single source of truth)
+- `packages/create-restack-pattern/` — Interactive CLI scaffolder published on npm
 
 ## Build and Dev Commands
 All commands should be run from the repository root:
@@ -21,9 +24,11 @@ All commands should be run from the repository root:
 - `pnpm --filter @restack/shared build` — Build shared Zod schemas (run first!)
 - `pnpm --filter backend dev` — Start Hono dev server on port 3001
 - `pnpm --filter frontend dev` — Start Next.js dev server on port 3000
-- `pnpm --filter backend db:push` — Push Drizzle schema to PostgreSQL database
+- `pnpm --filter backend db:push` — Push Drizzle schema to database
 - `pnpm --filter backend db:studio` — Open Drizzle Studio database viewer
 - `pnpm --filter backend test` — Run Vitest tests
+- `pnpm lint` — Run Biome linter across all packages (<50ms)
+- `pnpm format` — Auto-format all code with Biome
 
 ## Architecture Rules: Semi-DDD (Feature-Driven)
 Code is organized by business domain/feature, not by file type.
@@ -49,14 +54,20 @@ Each domain has 4 primary files:
 `pnpm --filter @restack/shared build`
 (or keep `pnpm --filter @restack/shared dev` watch mode running in a terminal) or the frontend and backend will fail to resolve the updated types or throw compilation errors.
 
-## Auth & Cookie Strategy
+## Auth & Cookie Strategy (Hybrid Auth & RBAC)
+- **Hybrid Auth**: Accepts tokens via `Authorization: Bearer <token>` header first (for mobile, scripts, and external clients) or `access_token` HttpOnly cookie (for web browsers).
+- **Dual Token Issuance**: Endpoints `/register`, `/login`, and `/refresh` return `{ user, accessToken, refreshToken }` in JSON body while simultaneously issuing HttpOnly cookies.
+- **RBAC Guard**: Use `requireRole(...roles)` after `requireAuth` to restrict routes by role:
+  ```ts
+  userRoutes.get("/admin", requireAuth, requireRole("admin"), (c) => ...)
+  ```
 - Short-lived JWT `access_token` (15m) and opaque `refresh_token` (30d) are both set as `httpOnly` cookies at `Path=/`.
 - Access tokens are automatically refreshed by the client-side `apiClient` on a 401 response.
 - Cookie configuration: `SameSite=None` in production (requires `Secure=true`), and `SameSite=Lax` in development (`Secure=false` since local dev runs on HTTP).
-- There is no server-side auth gate (`middleware.ts`/`proxy.ts`) because cookies cannot be read server-side when frontend and backend deploy to unrelated domains (Topology B). Authenticated routes are protected via backend `requireAuth` middleware, and frontend pages are protected via `<RequireAuth>` or client-side checks in hooks.
 
 ## Structured & Correlation Logging
 - Every incoming HTTP request is tagged with a unique `requestId` via Hono's `requestId` middleware.
 - A request-scoped child logger (`logger.child({ requestId })`) is bound to Hono's context.
-- In route handlers, always extract the request-specific child logger from Hono's context (`c.get("logger") || logger`) to log events. This ensures all logs generated during a request carry the correct `requestId` and `userId` context (which is automatically enriched by the `requireAuth` middleware).
+- In route handlers, always extract the request-specific child logger from Hono's context (`c.get("logger") || logger`) to log events. This ensures all logs generated during a request carry the correct `requestId`, `userId`, and `authMethod`.
+
 

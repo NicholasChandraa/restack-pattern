@@ -23,13 +23,16 @@ Perintah ini akan men-generate monorepo yang siap digunakan untuk produksi (prod
 
 | Lapisan (Layer) | Teknologi                                                            |
 | --------------- | -------------------------------------------------------------------- |
-| Frontend        | Next.js (App Router)                                                 |
+| Frontend        | Next.js 16 (App Router dengan Turbopack & Typed Routes)              |
 | Backend         | Hono                                                                 |
 | Database ORM    | Drizzle ORM                                                          |
-| Database        | PostgreSQL (Neon)                                                    |
-| Validasi        | Zod (dibagi bersama antara FE ↔ BE)                                  |
-| Autentikasi     | JWT di dalam cookie httpOnly                                         |
-| Monorepo        | pnpm workspaces (dapat ditambahkan Turborepo jika diperlukan)        |
+| Database        | PostgreSQL (`postgres-js`) atau SQLite (`better-sqlite3`)            |
+| Primary Keys    | RFC 9562 UUIDv7 atau Serial Auto-Increment                           |
+| Validasi        | Zod (dibagi bersama antara FE ↔ BE via `@restack/shared`)            |
+| Autentikasi     | Hybrid Auth (Header Bearer + HttpOnly Cookie flow)                   |
+| Kontrol Akses   | RBAC Middleware Guards (`requireRole`)                               |
+| Kualitas Kode   | Biome v2 (linter & formatter sub-50ms) + TypeScript Strict           |
+| Monorepo        | pnpm workspaces (juga mendukung npm & bun)                           |
 | Deploy Frontend | Penyedia hosting statis mana pun (Vercel, Netlify, Cloudflare Pages) |
 | Deploy Backend  | Penyedia hosting Node.js mana pun (Railway, Render, Fly.io, VPS)     |
 

@@ -4,7 +4,7 @@
 [![npm license](https://img.shields.io/npm/l/create-restack-pattern.svg)](https://www.npmjs.com/package/create-restack-pattern)
 [![node version](https://img.shields.io/node/v/create-restack-pattern.svg)](https://nodejs.org)
 
-Skip the boilerplate — scaffold a full-stack Next.js + Hono + PostgreSQL monorepo with secure auth cookies, structured logging, and a type-safe Hono RPC client end-to-end, all wired up and ready to deploy.
+Skip the boilerplate — scaffold a full-stack Next.js + Hono monorepo with your choice of PostgreSQL or SQLite, UUIDv7 or Serial IDs, Hybrid Auth (Bearer + HttpOnly Cookies), RBAC guards, and end-to-end type safety.
 
 This is the source repository. The CLI itself is published on npm as [`create-restack-pattern`](https://www.npmjs.com/package/create-restack-pattern).
 
@@ -12,18 +12,48 @@ This is the source repository. The CLI itself is published on npm as [`create-re
 
 Before running the scaffolding command, ensure you have:
 - **Node.js**: version 20 or higher
-- **pnpm**: package manager installed (run `npm install -g pnpm` if needed)
-- **PostgreSQL**: a running database (either a local instance or a free hosted instance on [Neon](https://neon.tech))
+- **Package Manager**: `pnpm` (recommended), `npm`, or `bun`
+- **Database**: PostgreSQL (Neon, Supabase, Docker) or SQLite (zero-config local file)
 
-## Quick Start (For Users)
+## Quick Start (Interactive Scaffolder)
 
-To scaffold a new project instantly:
+To scaffold a new project with the interactive wizard:
 
 ```bash
+# Using pnpm (Recommended)
+pnpm create restack-pattern my-app
+
+# Or using npx
 npx create-restack-pattern my-app
+
+# Or using bun
+bun create restack-pattern my-app
 ```
 
-Once the CLI finishes scaffolding, follow these three simple steps to get started:
+The interactive wizard lets you customize your stack:
+```
+┌  create-restack-pattern
+│
+◇  What is your project named?
+│  my-app
+│
+◇  Select your database:
+│  ● PostgreSQL (Neon, Supabase, Docker, AWS RDS)
+│  ○ SQLite (Zero-config local file, Turso, Edge)
+│
+◇  Select primary key strategy:
+│  ● UUIDv7 (Time-sortable, unguessable, secure against enumeration)
+│  ○ Serial Integer (Auto-incrementing 1, 2, 3...)
+│
+◇  Select package manager:
+│  ● pnpm (Recommended)
+│  ○ npm
+│  ○ bun
+│
+└  Scaffolding my-app ...
+```
+
+Once the CLI finishes scaffolding:
 
 ### 1. Configure Environment Variables
 
@@ -33,14 +63,10 @@ cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
 
-- Open `backend/.env` and set:
-  - `DATABASE_URL` (format: `postgresql://user:password@localhost:5432/dbname`; you can use a local Postgres database or a free hosted instance on [Neon](https://neon.tech))
-  - `JWT_SECRET` (generate a secure 32-character key by running: `openssl rand -base64 32`)
-- _(Optional)_ Open `frontend/.env` to override `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:3001` for local Hono API).
+- For **PostgreSQL**: Set `DATABASE_URL` (e.g. `postgresql://user:password@localhost:5432/dbname`) and a 32-character `JWT_SECRET`.
+- For **SQLite**: `DATABASE_URL` defaults to `sqlite.db` (created automatically).
 
 ### 2. Push Database Tables
-
-This creates the required `users` and `auth_sessions` tables in your database:
 
 ```bash
 pnpm --filter backend db:push
@@ -59,14 +85,18 @@ pnpm dev
 
 ## Tech Stack
 
-| Layer      | Tech                                                              |
-| ---------- | ----------------------------------------------------------------- |
-| Frontend   | Next.js 16 (App Router)                                           |
-| Backend    | Hono                                                              |
-| Database   | PostgreSQL, via Drizzle ORM                                       |
-| Validation | Zod (shared between frontend and backend)                         |
-| Auth       | JWT access token + opaque refresh token, both in httpOnly cookies |
-| Monorepo   | pnpm workspaces                                                   |
+| Layer          | Tech                                                                 |
+| -------------- | -------------------------------------------------------------------- |
+| Frontend       | Next.js 16 (App Router with Turbopack & Typed Routes)                |
+| Backend        | Hono                                                                 |
+| Database ORM   | Drizzle ORM                                                          |
+| Database       | PostgreSQL (`postgres-js`) or SQLite (`better-sqlite3`)              |
+| Primary Keys   | RFC 9562 UUIDv7 (time-ordered, unguessable) or Serial Auto-Increment |
+| Validation     | Zod v4 (shared between frontend and backend via `@restack/shared`)   |
+| Auth           | Hybrid Auth: `Authorization: Bearer <token>` + HttpOnly Cookie flow  |
+| Access Control | Role-Based Access Control (RBAC) middleware guards                   |
+| Monorepo       | pnpm workspaces (also supports npm and bun)                          |
+| Quality        | Biome v2 (sub-50ms linter & formatter) + Strict TypeScript           |
 
 ---
 
@@ -92,18 +122,34 @@ my-app/
 
 See [`DEVELOPMENT.md`](./DEVELOPMENT.md) for the full layer-by-layer breakdown, cross-domain import rules, and design details.
 
-### 2. Auth Flow (Dual-Cookie Refresh Tokens)
+### 2. Hybrid Auth & Dual Token Issuance
 
-Dual-cookie refresh tokens: a short-lived JWT `access_token` (15m) and an opaque, single-use `refresh_token` (30d). The frontend's `api-client.ts` transparently exchanges an expired access token for a new pair on the first 401 it sees — no manual re-login until the refresh token itself expires. Refresh tokens are hashed (never stored raw) and rotated atomically on every exchange (using a single DB DELETE ... RETURNING operation to prevent TOCTOU race conditions).
+Supports both web browsers and external/mobile API clients out-of-the-box:
+- **Authorization Header (Bearer)**: Inspected first (`Authorization: Bearer <token>`). Enables external clients, native mobile apps, and scripts to authenticate seamlessly.
+- **HttpOnly Cookies**: Fallback for web browser clients, protecting against XSS attacks.
+- **Dual Token Issuance**: Endpoints `/register`, `/login`, and `/refresh` return `{ user, accessToken, refreshToken }` in JSON body while simultaneously setting secure `Set-Cookie` headers.
+- **Logger Enrichment**: Pino request logger is automatically enriched with `authMethod: "bearer" | "cookie"` and `userId`.
+- **Atomic Token Rotation**: Single-use opaque refresh tokens are hashed (SHA-256) and rotated atomically using `DELETE ... RETURNING` to eliminate TOCTOU race conditions.
 
-### 3. Structured & Correlation Logging
+### 3. Role-Based Access Control (RBAC)
+
+- User schema includes `role: text("role").default("user").notNull()`.
+- Middleware guard `requireRole(...allowedRoles)` in `backend/src/infra/middlewares/require-role.ts`.
+- Easily protect endpoints with declarative role checks:
+  ```ts
+  userRoutes.get("/admin", requireAuth, requireRole("admin"), (c) => {
+    return c.json({ message: "Admin area" }, 200)
+  })
+  ```
+
+### 4. Structured & Correlation Logging
 
 This template implements **production-ready structured logging** using **Pino** and **Hono**:
 
 - **Request ID (Correlation ID)**: A unique UUID is generated for every incoming HTTP request via Hono's `requestId` middleware.
-- **Contextual Request Logger**: A request-specific child logger (`logger.child({ requestId })`) is bound to Hono's context. Any message logged within the request lifecycle automatically carries the `requestId`, making it trivial to trace logs in production without them interleaving.
-- **User Context Integration**: The authentication middleware automatically enriches the request's child logger with `userId` context. Every log printed during a request made by an authenticated user will automatically have `userId` attached.
-- **Pino + Pino-Pretty**: Standard JSON line formatting in production (ideal for aggregator platforms like BetterStack/Logtail, Axiom, Datadog) and beautiful colored console output in local development.
+- **Contextual Request Logger**: A request-specific child logger (`logger.child({ requestId })`) is bound to Hono's context. Any message logged within the request lifecycle automatically carries the `requestId`.
+- **User Context Integration**: The authentication middleware automatically enriches the request's child logger with `userId` and `authMethod`.
+- **Pino + Pino-Pretty**: Standard JSON line formatting in production and colored console output in local development.
 
 ---
 

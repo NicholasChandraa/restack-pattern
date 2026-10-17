@@ -4,9 +4,9 @@ import { csrf } from "hono/csrf"
 import { logger as honoLogger } from "hono/logger"
 import { requestId } from "hono/request-id"
 import { env } from "./config/env.js"
-import { logger, type AppVariables } from "./utils/logger.js"
 import { authRoutes } from "./domains/auth/auth.routes.js"
 import { userRoutes } from "./domains/user/user.routes.js"
+import { type AppVariables, logger } from "./utils/logger.js"
 
 /**
  * Hono application instance — routes, middleware, everything except the transport.
@@ -16,9 +16,7 @@ import { userRoutes } from "./domains/user/user.routes.js"
  */
 export const app = new Hono<{ Variables: AppVariables }>()
 
-const allowedOrigins = env.FRONTEND_URL
-  .split(",")
-  .map((url) => url.trim())
+const allowedOrigins = env.FRONTEND_URL.split(",").map((url) => url.trim())
 
 // 1. Generate unique request IDs for all API calls
 app.use("/api/*", requestId())
@@ -43,7 +41,7 @@ app.use(
   "/api/*",
   honoLogger((...args) => {
     logger.info(args.join(" "))
-  })
+  }),
 )
 
 app.use(
@@ -51,21 +49,18 @@ app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
-  })
+  }),
 )
 
 app.use(
   "/api/*",
   csrf({
     origin: allowedOrigins,
-  })
+  }),
 )
 
-const routes = app
-  .route("/api/auth", authRoutes)
-  .route("/api/user", userRoutes)
+const routes = app.route("/api/auth", authRoutes).route("/api/user", userRoutes)
 
 app.get("/", (c) => c.json({ status: "ok" }))
 
 export type AppType = typeof routes
-

@@ -1,7 +1,7 @@
 import Link from "next/link"
-import { LogoutButton } from "@/domains/auth/components/logout-button"
-import { Button } from "@/components/ui/button"
 import { RequireAuth } from "@/components/require-auth"
+import { Button } from "@/components/ui/button"
+import { LogoutButton } from "@/domains/auth/components/logout-button"
 
 /**
  * Next.js Router Page: Dashboard

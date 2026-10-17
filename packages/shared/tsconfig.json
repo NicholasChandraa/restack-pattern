@@ -28,6 +28,32 @@
      * @description Enables all strict type-checking options to prevent common runtime bugs.
      */
     "strict": true,
+    /**
+     * @noUncheckedIndexedAccess true
+     * @description Adds 'undefined' to any un-declared index access (e.g. arr[i] or record[key]),
+     * forcing explicit null/undefined checks and preventing runtime crashes.
+     */
+    "noUncheckedIndexedAccess": true,
+
+    /**
+     * @exactOptionalPropertyTypes true
+     * @description Differentiates between omitted optional properties and properties explicitly set to 'undefined',
+     * preventing unintended database column mutations and serialization bugs.
+     */
+    "exactOptionalPropertyTypes": true,
+
+    /**
+     * @noImplicitReturns true
+     * @description Ensures all execution branches in a function explicitly return a value,
+     * preventing accidental implicit 'undefined' returns.
+     */
+    "noImplicitReturns": true,
+
+    /**
+     * @noFallthroughCasesInSwitch true
+     * @description Reports an error for fallthrough cases in switch statements that are missing a 'break' or 'return'.
+     */
+    "noFallthroughCasesInSwitch": true,
 
     /**
      * @skipLibCheck true

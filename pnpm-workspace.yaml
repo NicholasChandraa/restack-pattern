@@ -2,3 +2,11 @@ packages:
   - "frontend"
   - "backend"
   - "packages/*"
+allowBuilds:
+  better-sqlite3: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@e2e-dev/web@0.15.2'
+  - e2e@0.21.2

@@ -21,17 +21,20 @@ Generates a production-ready monorepo with Next.js + Hono + Drizzle ORM, structu
 
 ## Tech Stack
 
-| Layer           | Tech                                                  |
-| --------------- | ----------------------------------------------------- |
-| Frontend        | Next.js (App Router)                                  |
-| Backend         | Hono                                                  |
-| Database ORM    | Drizzle ORM                                           |
-| Database        | PostgreSQL (Neon)                                     |
-| Validation      | Zod (shared FE ↔ BE)                                  |
-| Auth            | JWT in httpOnly cookie                                |
-| Monorepo        | pnpm workspaces (+ Turborepo when build time matters) |
-| Frontend deploy | Any static host (Vercel, Netlify, Cloudflare Pages)   |
-| Backend deploy  | Any Node.js host (Railway, Render, Fly.io, VPS)       |
+| Layer           | Tech                                                                 |
+| --------------- | -------------------------------------------------------------------- |
+| Frontend        | Next.js 16 (App Router with Turbopack & Typed Routes)                |
+| Backend         | Hono                                                                 |
+| Database ORM    | Drizzle ORM                                                          |
+| Database        | PostgreSQL (`postgres-js`) or SQLite (`better-sqlite3`)              |
+| Primary Keys    | RFC 9562 UUIDv7 or Serial Auto-Increment                             |
+| Validation      | Zod (shared FE ↔ BE)                                                 |
+| Auth            | Hybrid Auth (Bearer header + HttpOnly cookie flow)                   |
+| Access Control  | RBAC Middleware Guards (`requireRole`)                               |
+| Quality         | Biome v2 (linter & formatter) + Strict TypeScript                    |
+| Monorepo        | pnpm workspaces (also supports npm & bun)                            |
+| Frontend deploy | Any static host (Vercel, Netlify, Cloudflare Pages)                  |
+| Backend deploy  | Any Node.js host (Railway, Render, Fly.io, VPS)                      |
 
 ---
 

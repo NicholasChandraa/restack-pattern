@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { AuthUser } from "./user.schema.js"
 
 /** Zod validation schema for login form and request payload. */
 export const LoginSchema = z.object({
@@ -18,3 +19,10 @@ export type LoginInput = z.infer<typeof LoginSchema>
 
 /** TypeScript input type inferred from RegisterSchema. */
 export type RegisterInput = z.infer<typeof RegisterSchema>
+
+/** Auth response payload returned on register, login, and token rotation. */
+export interface AuthResponse {
+  user: AuthUser
+  accessToken: string
+  refreshToken: string
+}
